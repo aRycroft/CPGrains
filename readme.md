@@ -1,4 +1,11 @@
 ## Project Log
+### 21st May
+Change from using 4 grainGen objects to 1 grainGen obj with 128 channels. Signals from all CPG nodes are sent into this grain object. Not sure how to specify parameters for each node now, will need to send all information about grains at signal rate. Possible to have lots of inlets to grainGen and change depending on what node has just been triggered.
+
+Need to change how grains are triggered and how to choose which channel. Right now it just uses a counter that goes up forever and takes a modulus from it to choose a channel, probably not great....
+
+Can now use neurhythmic app to control nodes, just need to start the app after starting Max. Some interesting timbral things happen when a network has been set up. Maybe good technique to first build an interesting rhythm with the nodes then speed up afterwards... It's sometimes hard to hear exactly how the network is affecting the final sound.
+
 ### 19th May
 Now using 4 CPG nodes with grainGen objects, each with 32 channels. This can be reduced to 16 channels without making the synth sound bad. Still have issue with slow output from CPG network. Instead of using trigger output I am using the main output and detecting when the signal crosses 0.5f. This works ok but the network can still not go faster than 400Hz. This is probably fast enough all considered but this might be improved later to go fastfast.
 

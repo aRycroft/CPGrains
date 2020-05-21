@@ -39,7 +39,7 @@
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
 				"box" : 				{
-					"code" : "if (mc_channel - 1 == (in1 % 32)){\r\n\r\n\t\tout = 1;\r\n\t\r\n}\r\n",
+					"code" : "if (mc_channel - 1 == (in1 % 128)){\r\n\r\n\t\tout = 1;\r\n\t\r\n}\r\n",
 					"fontface" : 0,
 					"fontname" : "Lucida Console",
 					"fontsize" : 12.0,
