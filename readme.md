@@ -6,7 +6,10 @@ Download this repo to your max packages folder.
 4. Add up to 4 nodes using neurhytmicGUI to control grain rhythms
 
 ## Project Log
-### 27thMay
+### 2nd June
+Another redo of grainGen now just one gen~ object with external buffers containing information for each track. In c++ this can all be converted to an array of objects probably. Also created a basic GUI in JUCE, connections can be added by shift-clicking. New nodes can be made by clicking the button. It's still nicer to use neurythmic gui so I'm using that for testing just now.
+Another addition is the ability to mute and pan grain channels. This is done by setting the detection threshold for a node to 0.
+### 27th May
 Redo of grainGen object now one gen with 128 channels. Basic gui created in presentation mode allowing users to change parameters for each node. Currently can choose grain size, grain start and frequency multiplier from main node.
 ### 21st May
 Change from using 4 grainGen objects to 1 grainGen obj with 128 channels. Signals from all CPG nodes are sent into this grain object. Not sure how to specify parameters for each node now, will need to send all information about grains at signal rate. Possible to have lots of inlets to grainGen and change depending on what node has just been triggered.
