@@ -1,8 +1,7 @@
 ## Install + Run
-Download this repo to your max packages folder.
-1. (Max CPG library) [https://github.com/DanBennettDev/max_cpg]
+1. Download this repo to your max packages folder. https://github.com/DanBennettDev/max_cpg
 2. From CPG library run neurhythmicGUI in max_cpg-master\NeurythmicApp\gui\
-3. Download this repo and run CPGrains.maxpat, use presentation mode
+3. Download CPGrains repo and run CPGrains.maxpat, use presentation mode
 4. Add up to 4 nodes using neurhytmicGUI to control grain rhythms
 
 ## Project Log
