@@ -15,7 +15,9 @@ MainComponent::MainComponent()
 {
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
-    controlsPanel.addSlider("grainLength", this, 5.0f, 5000.0f, 0.25);
+    controlsPanel.addSlider("grainLength", this, 5.0f, 5000.0f, 0.25f);
+    controlsPanel.addSlider("startTime", this, 0.0f, 1000.0f, 1.0f);
+    controlsPanel.addSlider("frequency", this, 0.0f, 32.0f, 0.5f);
     nodePanel.setInterceptsMouseClicks(false, true);
     addAndMakeVisible(&addNodeButton);
     addNodeButton.addListener(this);
@@ -36,9 +38,8 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     nodePanel.setBounds(0, 0, getWidth(), getHeight() - (getHeight() / 5));
-    controlsPanel.setBounds(0, getHeight() - (getHeight() / 5), getWidth(), getHeight() - (getHeight() / 5));
+    controlsPanel.setBounds(0, getHeight() - (getHeight() / 5), getWidth(), (getHeight() / 5));
     addNodeButton.setBounds(0, 0, 50, 50);
-    
 }
 
 void MainComponent::mouseDown(const MouseEvent& e)
@@ -97,10 +98,12 @@ void MainComponent::makeNode(int x, int y)
     node->addComponentListener(this);
     node->setAlwaysOnTop(true);
     node->addMouseListener(this, false);
-    node->setBounds(node->getX(), node->getY(), 50, 50);
+    nodePanel.resized();
+
     ValueTree nodeParam(node->getComponentID());
     nodeParam.setProperty("grainLength", 50.0f, nullptr);
     nodeParam.setProperty("startTime", 0.0f, nullptr);
+    nodeParam.setProperty("frequency", 2.0f, nullptr);
     //nodeParam.setProperty("freq", 1.5f, nullptr);
     controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
 }

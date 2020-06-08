@@ -60,8 +60,9 @@ private:
 
         void resized() override
         {
-            for (auto nodes : allNodes) {
-                nodes->setBounds(nodes->getX(), nodes->getY(), 50, 50);
+            int nodeSize = std::min(proportionOfHeight(0.2), proportionOfWidth(0.2));
+            for (auto node : allNodes) {
+                node->setBounds(std::min(getParentWidth() - nodeSize, node->getX()), std::min(getParentHeight() - nodeSize, node->getY()), nodeSize, nodeSize);
             }
             for (auto con : allCons) {
                 con->recalculatePath();
@@ -87,9 +88,30 @@ private:
 
         void resized() override
         {
-            for (auto slider : sliders) {
-                slider->setBounds(0,0, 150, 100);
+            Grid grid;
+
+            using Track = Grid::TrackInfo;
+            grid.templateRows = { Track(1_fr) };
+            grid.templateColumns = { Track(1_fr), Track(1_fr), Track(1_fr) };
+            for (auto* s : sliders) {
+                GridItem g1 = GridItem(s);
+                //g1.maxWidth = 200.0f;
+                //g1.maxHeight = 200.0f;
+                grid.items.add(g1);
+                grid.performLayout(getLocalBounds());
             }
+            /*
+            FlexBox fb;
+            fb.flexWrap = FlexBox::Wrap::wrap;
+            fb.justifyContent = FlexBox::JustifyContent::flexStart;
+            fb.alignContent = FlexBox::AlignContent::flexStart;
+
+            for (auto* s : sliders) {
+                fb.items.add(FlexItem(*s).withMinWidth(150.0f).
+                    withMinHeight(100.0f));
+            }
+            fb.performLayout(getLocalBounds().toFloat());
+            */
         }
 
         void addSlider(String name, Slider::Listener* listener, double rangeStart, double rangeEnd, double skewFactor) {
@@ -105,6 +127,7 @@ private:
             for (auto slider : sliders) {
                 slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()]);
                 slider->setVisible(true);
+                resized();
             }
         }
 
