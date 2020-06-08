@@ -15,8 +15,7 @@ MainComponent::MainComponent()
 {
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
-    addSlider("grainLength", 
-    paramTree = ValueTree(Identifier("nodeParams"));
+    controlsPanel.addSlider("grainLength", this, 5.0f, 5000.0f, 0.25);
     nodePanel.setInterceptsMouseClicks(false, true);
     addAndMakeVisible(&addNodeButton);
     addNodeButton.addListener(this);
@@ -37,9 +36,8 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     nodePanel.setBounds(0, 0, getWidth(), getHeight() - (getHeight() / 5));
+    controlsPanel.setBounds(0, getHeight() - (getHeight() / 5), getWidth(), getHeight() - (getHeight() / 5));
     addNodeButton.setBounds(0, 0, 50, 50);
-    grainLengthSlider.setBounds(0, getHeight() - (getHeight() / 5), 150, 100);
-    startTimeSlider.setBounds(getWidth() / 10 * 3, getHeight() - (getHeight() / 5), 150, 100);
     
 }
 
@@ -57,7 +55,7 @@ void MainComponent::mouseDown(const MouseEvent& e)
     if (node != 0) {
         node->setNodeColour(Colours::white);
         nodePanel.clickedNode = node;
-        controlsPanel.showSliders(nodePanel.clickedNode->getComponentID());
+        controlsPanel.showSliders(node->getComponentID());
         return;
     }
     CPGConnection* clickedConnection;
@@ -82,9 +80,11 @@ void MainComponent::buttonClicked(Button* button)
 
 void MainComponent::sliderValueChanged(Slider* slider)
 {
-    ValueTree nodeTree = paramTree.getChildWithName(nodePanel.clickedNode->getComponentID());
-    nodeTree.setProperty(slider->getComponentID(), slider->getValue(), nullptr);
-    setter.setParam(slider->getComponentID(), nodePanel.clickedNode->getComponentID().getIntValue(), slider->getValue());
+    CPGNode* clickedNode = nodePanel.clickedNode;
+    if (clickedNode == nullptr) return;
+    ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
+    nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
+    setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
 }
 
 void MainComponent::makeNode(int x, int y)
@@ -93,7 +93,6 @@ void MainComponent::makeNode(int x, int y)
     int id = nodePanel.availableNodes.top();
     nodePanel.availableNodes.pop();
     nodePanel.addAndMakeVisible(nodePanel.allNodes.add(new CPGNode(id, x, y)));
-    //addAndMakeVisible(allNodes.add(new CPGNode(id, x, y)));
     CPGNode* node = nodePanel.allNodes.getLast();
     node->addComponentListener(this);
     node->setAlwaysOnTop(true);
@@ -103,7 +102,7 @@ void MainComponent::makeNode(int x, int y)
     nodeParam.setProperty("grainLength", 50.0f, nullptr);
     nodeParam.setProperty("startTime", 0.0f, nullptr);
     //nodeParam.setProperty("freq", 1.5f, nullptr);
-    paramTree.addChild(nodeParam, -1, nullptr);
+    controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
 }
 
 void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
@@ -138,14 +137,7 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
         }
     }
 }
-void MainComponent::addSlider(String name, double rangeStart, double rangeEnd, double skewFactor) {
-    Slider slider;
-    slider.setComponentID(name);
-    slider.setSliderStyle(Slider::Rotary);
-    slider.setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.001f, skewFactor));
-    slider.addListener(this);
 
-}
 
 
 

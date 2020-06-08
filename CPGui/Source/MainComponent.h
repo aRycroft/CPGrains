@@ -41,7 +41,6 @@ private:
     void makeNode(int x, int y);
     void makeConnection(CPGNode* from, CPGNode* to);
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
-    void addSlider(String name, double rangeStart, double rangeEnd, double skewFactor);
 
     struct nodeContainer : public Component {
         nodeContainer(int numNodes) {
@@ -76,32 +75,53 @@ private:
     };
 
     struct controlsContainer : public Component{
+
         controlsContainer() {
+            paramTree = ValueTree(Identifier("nodeParams"));
         }
+
+        void paint(Graphics& g) override
+        {
+            g.fillAll(Colours::navajowhite);
+        }
+
+        void resized() override
+        {
+            for (auto slider : sliders) {
+                slider->setBounds(0,0, 150, 100);
+            }
+        }
+
+        void addSlider(String name, Slider::Listener* listener, double rangeStart, double rangeEnd, double skewFactor) {
+            addChildComponent(sliders.add(new Slider(name)));
+            Slider* slider = sliders.getLast();
+            slider->setSliderStyle(Slider::Rotary);
+            slider->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.001f, skewFactor));
+            slider->addListener(listener);
+        }
+
         void showSliders(String componentId)
         {
-            grainLengthSlider.setValue(paramTree.getChildWithName(componentId)["grainLength"]);
-            grainLengthSlider.setVisible(true);
-            startTimeSlider.setValue(paramTree.getChildWithName(componentId)["startTime"]);
-            startTimeSlider.setVisible(true);
+            for (auto slider : sliders) {
+                slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()]);
+                slider->setVisible(true);
+            }
         }
 
         void hideSliders() {
-            grainLengthSlider.setVisible(false);
-            startTimeSlider.setVisible(false);
+            for (auto slider : sliders) {
+                slider->setVisible(false);
+            }
+
         }
 
+        ValueTree paramTree;
         OwnedArray<Slider> sliders;
-
     };
-
 
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
-    bool repaintCons{ true };
     TextButton addNodeButton;
     OSCParamSetter setter{ 8000 };
-    ValueTree paramTree;
-    Slider grainLengthSlider, startTimeSlider;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
