@@ -18,6 +18,7 @@ public:
     OSCParamSetter(int portNumber);
     void setWeight(int currentNode, int targetNode, float weight) override;
     void setParam(String toSet, int nodeNo, float value) override;
+    void setFile(String filePath) override;
 private:
     OSCSender sender;
     int tick = 0;

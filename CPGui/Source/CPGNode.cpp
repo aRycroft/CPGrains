@@ -26,9 +26,14 @@ void CPGNode::paint(Graphics& g)
 	auto area = getLocalBounds().reduced(1);
 
 	g.setColour(colour);
-	g.drawRoundedRectangle(area.toFloat(), 100.0f, 2.0f);
+	if (isActive) {
+		g.fillRoundedRectangle(area.toFloat(), 100.0f);
+	}
+	else {
+		g.drawRoundedRectangle(area.toFloat(), 100.0f, 2.0f);
+	}
 
-	g.setColour(findColour(TextButton::textColourOffId));
+	g.setColour(Colours::black);
 	g.drawFittedText(getComponentID(), area, Justification::centred, 1);
 }
 

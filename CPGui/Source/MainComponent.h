@@ -24,7 +24,8 @@ class MainComponent   : public Component,
                         public ComponentListener,
                         public MouseListener,
                         public Button::Listener,
-                        public Slider::Listener
+                        public Slider::Listener,
+                        public FilenameComponentListener
 {
 public:
     //==============================================================================
@@ -35,12 +36,15 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void mouseDown(const MouseEvent& e) override;
+    void mouseDoubleClick(const MouseEvent& event) override;
     void buttonClicked(Button* button) override;
     void sliderValueChanged(Slider* slider) override;
 private:
     void makeNode(int x, int y);
     void makeConnection(CPGNode* from, CPGNode* to);
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
+
+    void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
 
     struct nodeContainer : public Component {
         nodeContainer(int numNodes) {
@@ -60,7 +64,8 @@ private:
 
         void resized() override
         {
-            int nodeSize = std::min(proportionOfHeight(0.2), proportionOfWidth(0.2));
+            //int nodeSize = std::min(proportionOfHeight(0.12), proportionOfWidth(0.12));
+            int nodeSize = 70.0f;
             for (auto node : allNodes) {
                 node->setBounds(std::min(getParentWidth() - nodeSize, node->getX()), std::min(getParentHeight() - nodeSize, node->getY()), nodeSize, nodeSize);
             }
@@ -77,13 +82,14 @@ private:
 
     struct controlsContainer : public Component{
 
-        controlsContainer() {
+        controlsContainer(Slider::Listener* listener) {
             paramTree = ValueTree(Identifier("nodeParams"));
+            addSliders(listener);
         }
 
         void paint(Graphics& g) override
         {
-            g.fillAll(Colours::navajowhite);
+            g.fillAll(Colours::darkslategrey);
         }
 
         void resized() override
@@ -91,60 +97,107 @@ private:
             Grid grid;
 
             using Track = Grid::TrackInfo;
-            grid.templateRows = { Track(1_fr) };
-            grid.templateColumns = { Track(1_fr), Track(1_fr), Track(1_fr) };
+            grid.templateRows = { Track(1_fr)};
+            grid.templateColumns = { Track(1_fr), Track(2_fr), 
+                                     Track(1_fr), Track(2_fr), 
+                                     Track(1_fr), Track(2_fr),
+                                     Track(1_fr), Track(2_fr) };
             for (auto* s : sliders) {
                 GridItem g1 = GridItem(s);
-                //g1.maxWidth = 200.0f;
-                //g1.maxHeight = 200.0f;
+                g1.withAlignSelf(GridItem::AlignSelf::stretch);
+                g1.minWidth = 100.0f;
+                g1.minHeight = 70.0f;
+                grid.items.add(GridItem());
                 grid.items.add(g1);
                 grid.performLayout(getLocalBounds());
             }
-            /*
-            FlexBox fb;
-            fb.flexWrap = FlexBox::Wrap::wrap;
-            fb.justifyContent = FlexBox::JustifyContent::flexStart;
-            fb.alignContent = FlexBox::AlignContent::flexStart;
-
-            for (auto* s : sliders) {
-                fb.items.add(FlexItem(*s).withMinWidth(150.0f).
-                    withMinHeight(100.0f));
-            }
-            fb.performLayout(getLocalBounds().toFloat());
-            */
         }
 
+        void addSliders(Slider::Listener* listener) {
+            addChildComponent(sliders.add(new Slider("grainLength")));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.01f, 0.25f));
+            addChildComponent(labels.add(new Label()));
+            Label* l = labels.getLast();
+            l->setText("Grain Size", dontSendNotification);
+            l->attachToComponent(sliders.getLast(), true);
+
+            addChildComponent(sliders.add(new Slider("startTime")));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.01f, 1.0f));
+            addChildComponent(labels.add(new Label()));
+            l = labels.getLast();
+            l->setText("Grain Position", dontSendNotification);
+            l->attachToComponent(sliders.getLast(), true);
+
+            addChildComponent(sliders.add(new Slider("frequency")));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.03125f, 16.0f, 0.01f, 1.0f));
+            addChildComponent(labels.add(new Label()));
+            l = labels.getLast();
+            l->setText("Frequency", dontSendNotification);
+            l->attachToComponent(sliders.getLast(), true);
+
+            addChildComponent(sliders.add(new Slider("pan")));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
+            addChildComponent(labels.add(new Label()));
+            l = labels.getLast();
+            l->setText("Pan", dontSendNotification);
+            l->attachToComponent(sliders.getLast(), true);
+
+            for (auto* slider : sliders) {
+                slider->setSliderStyle(Slider::Rotary);
+                slider->addListener(listener);
+            }
+        }
+
+        /*
         void addSlider(String name, Slider::Listener* listener, double rangeStart, double rangeEnd, double skewFactor) {
             addChildComponent(sliders.add(new Slider(name)));
             Slider* slider = sliders.getLast();
             slider->setSliderStyle(Slider::Rotary);
-            slider->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.001f, skewFactor));
+            slider->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.01f, skewFactor));
             slider->addListener(listener);
         }
 
+        void addFrequencySlider(Slider::Listener* listener) {
+            addChildComponent(sliders.add(new Slider("frequency")));
+            Slider* frequencySlider = sliders.getLast();
+            frequencySlider->setNormalisableRange(NormalisableRange<double>(-1.5f, 1.0f, 0.25f));
+            frequencySlider->onValueChange = [this] {
+                DBG("Yah");
+            };
+            frequencySlider->addListener(listener);
+        }*/
+
         void showSliders(String componentId)
         {
-            for (auto slider : sliders) {
+            for (auto& slider : sliders) {
                 slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()]);
                 slider->setVisible(true);
-                resized();
             }
+            for (auto& label : labels) {
+                label->setVisible(true);
+            }
+            resized();
         }
 
         void hideSliders() {
             for (auto slider : sliders) {
                 slider->setVisible(false);
             }
-
+            for (auto label : labels) {
+                label->setVisible(false);
+            }
         }
 
         ValueTree paramTree;
         OwnedArray<Slider> sliders;
+        OwnedArray<Label> labels;
     };
 
+    std::unique_ptr<FilenameComponent> fileComp;
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
     TextButton addNodeButton;
+    Slider mainFreqSlider;
     OSCParamSetter setter{ 8000 };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

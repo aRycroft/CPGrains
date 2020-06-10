@@ -37,3 +37,10 @@ void OSCParamSetter::setParam(String toSet, int nodeNo, float value)
     msg << "/control/" << toSet << "/" << nodeNo;
     sender.send(msg, value);
 }
+
+void OSCParamSetter::setFile(String filePath)
+{
+    String msg;
+    msg << "/file/";
+    sender.send(msg, filePath);
+}

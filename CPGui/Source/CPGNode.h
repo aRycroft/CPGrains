@@ -15,6 +15,7 @@
 class CPGNode : public Component
 {
 public:
+	CPGNode() {};
 	CPGNode(int nodeNo, int x, int y);
 	void paint(Graphics& g) override;
 	void resized() override;
@@ -25,12 +26,36 @@ public:
 	bool addConnection(std::shared_ptr<CPGConnection> connection);
 	void removeConnection(CPGConnection* connection);
 	void setNodeColour(juce::Colour newColour);
+	void toggleActive() {
+		isActive = !isActive;
+	}
+	bool nodeIsActive() { return isActive; };
 	ValueTree tree;
 private:
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
 	Array<std::shared_ptr<CPGConnection>> connections{};
 	int xPos, yPos;
+	bool isActive{ true };
 	juce::Colour colour;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPGNode)
 };
+
+/*class ControlNode : public CPGNode {
+public:
+	ControlNode(int nodeNo, int x, int y) {
+		this->setComponentID(String(nodeNo));
+		this->setCentrePosition(x, y);
+		setNodeColour(Colours::orange);
+	}
+	void paint(Graphics& g) {
+		auto area = getLocalBounds().reduced(1);
+		g.setColour(colour);
+		g.drawRoundedRectangle(area.toFloat(), 100.0f, 2.0f);
+
+		g.setColour(Colours::black);
+		g.drawFittedText(getComponentID(), area, Justification::centred, 1);
+	};
+
+};
+*/
