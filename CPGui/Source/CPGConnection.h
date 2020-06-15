@@ -26,6 +26,7 @@ public:
     Path getPath();
     float calculateWeight();
 private:
+    static Point<int> getCentre(Component* comp);
     Component *connectedTo, *parent;
     Path path;
 };

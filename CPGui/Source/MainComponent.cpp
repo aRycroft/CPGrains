@@ -30,19 +30,32 @@ MainComponent::MainComponent()
         setter.setParam("mainFreq", 0, mainFreqSlider.getValue());
     };
     addAndMakeVisible(&mainFreqSlider);
-    addAndMakeVisible(&addNodeButton);
-    addNodeButton.addListener(this);
+    mFreqLabel.setText("Main Frequency", dontSendNotification);
+    mFreqLabel.attachToComponent(&mainFreqSlider, true);
+    addAndMakeVisible(&mFreqLabel);
 
+    addNodeButton.addListener(this);
+    addAndMakeVisible(&addNodeButton);
+    addButtonLabel.setText("Add Node", dontSendNotification);
+    addButtonLabel.attachToComponent(&addNodeButton, true);
+    addAndMakeVisible(&addButtonLabel);
+    File f{};
+    f = f.getCurrentWorkingDirectory().getSiblingFile("Samples/Guitar.wav");
     fileComp.reset(new FilenameComponent("fileComp",
-        {},                       // current file
+        {f},                       // current file
         false,                    // can edit file name,
         false,                    // is directory,
         false,                    // is for saving,
         {},                       // browser wildcard suffix,
         {},                       // enforced suffix,
         "Select file to open"));  // text when nothing selected
+
     addAndMakeVisible(fileComp.get());
     fileComp->addListener(this);
+    fileLabel.setText("Choose Sample", dontSendNotification);
+    fileLabel.attachToComponent(fileComp.get(), true);
+    addAndMakeVisible(&fileLabel);
+
 
     setSize (1000, 600);
     //makeControlNode(100, 100);
@@ -61,11 +74,12 @@ void MainComponent::paint (Graphics& g)
 
 void MainComponent::resized()
 {
+    int width = getWidth();
     //nodePanel.setBounds(0, 0, getWidth(), getHeight() - (getHeight() / 6));
     //controlsPanel.setBounds(0, getHeight() - (getHeight() / 6), getWidth(), (getHeight() / 6));
-    addNodeButton.setBounds(0, 0, 50, 50);
-    mainFreqSlider.setBounds(0, 50, 120, 120);
-    fileComp->setBounds(0, 170, 100, 50);
+    fileComp->setBounds(width - 150, 0, 150, 50);
+    mainFreqSlider.setBounds(width - 150, 50, 120, 120);
+    addNodeButton.setBounds(width - 150, 170, 50, 50);
 
     Grid grid;
 
@@ -166,6 +180,7 @@ void MainComponent::makeNode(int x, int y)
     nodeParam.setProperty("startTime", 0.0f, nullptr);
     nodeParam.setProperty("frequency", 1.0f, nullptr);
     nodeParam.setProperty("pan", 0.5f, nullptr);
+    nodeParam.setProperty("volume", 0.7f, nullptr);
     //nodeParam.setProperty("freq", 1.5f, nullptr);
     controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
 }

@@ -101,12 +101,13 @@ private:
             grid.templateColumns = { Track(1_fr), Track(2_fr), 
                                      Track(1_fr), Track(2_fr), 
                                      Track(1_fr), Track(2_fr),
+                                     Track(1_fr), Track(2_fr),
                                      Track(1_fr), Track(2_fr) };
             for (auto* s : sliders) {
                 GridItem g1 = GridItem(s);
                 g1.withAlignSelf(GridItem::AlignSelf::stretch);
-                g1.minWidth = 100.0f;
-                g1.minHeight = 70.0f;
+                g1.minWidth = 150.0f;
+                //g1.minHeight = 150.0f;
                 grid.items.add(GridItem());
                 grid.items.add(g1);
                 grid.performLayout(getLocalBounds());
@@ -125,14 +126,14 @@ private:
             sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.01f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
-            l->setText("Grain Position", dontSendNotification);
+            l->setText("Position", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("frequency")));
             sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.03125f, 16.0f, 0.01f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
-            l->setText("Frequency", dontSendNotification);
+            l->setText("Freq", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("pan")));
@@ -140,6 +141,13 @@ private:
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
             l->setText("Pan", dontSendNotification);
+            l->attachToComponent(sliders.getLast(), true);
+
+            addChildComponent(sliders.add(new Slider("volume")));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
+            addChildComponent(labels.add(new Label()));
+            l = labels.getLast();
+            l->setText("Volume", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             for (auto* slider : sliders) {
@@ -193,11 +201,12 @@ private:
         OwnedArray<Label> labels;
     };
 
-    std::unique_ptr<FilenameComponent> fileComp;
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
     TextButton addNodeButton;
     Slider mainFreqSlider;
+    std::unique_ptr<FilenameComponent> fileComp;
+    Label addButtonLabel, mFreqLabel, fileLabel;
     OSCParamSetter setter{ 8000 };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
