@@ -1,0 +1,230 @@
+{
+	"patcher" : 	{
+		"fileversion" : 1,
+		"appversion" : 		{
+			"major" : 8,
+			"minor" : 1,
+			"revision" : 4,
+			"architecture" : "x64",
+			"modernui" : 1
+		}
+,
+		"classnamespace" : "dsp.gen",
+		"rect" : [ 42.0, 85.0, 744.0, 740.0 ],
+		"bglocked" : 0,
+		"openinpresentation" : 0,
+		"default_fontsize" : 12.0,
+		"default_fontface" : 0,
+		"default_fontname" : "Arial",
+		"gridonopen" : 1,
+		"gridsize" : [ 15.0, 15.0 ],
+		"gridsnaponopen" : 1,
+		"objectsnaponopen" : 1,
+		"statusbarvisible" : 2,
+		"toolbarvisible" : 1,
+		"lefttoolbarpinned" : 0,
+		"toptoolbarpinned" : 0,
+		"righttoolbarpinned" : 0,
+		"bottomtoolbarpinned" : 0,
+		"toolbars_unpinned_last_save" : 0,
+		"tallnewobj" : 0,
+		"boxanimatetime" : 200,
+		"enablehscroll" : 1,
+		"enablevscroll" : 1,
+		"devicewidth" : 0.0,
+		"description" : "",
+		"digest" : "",
+		"tags" : "",
+		"style" : "",
+		"subpatcher_template" : "",
+		"assistshowspatchername" : 0,
+		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-17",
+					"linecount" : 2,
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 907.0, 59.0, 100.0, 36.0 ],
+					"text" : "history lastSample 0"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-1",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 411.230959177017212, 109.0, 100.0, 22.0 ],
+					"text" : "/ 1000"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-7",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 645.0, 14.0, 100.0, 22.0 ],
+					"text" : "buffer startArray"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-4",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 775.422449231147766, 89.0, 100.0, 22.0 ],
+					"text" : "in 3"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-10",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 517.0, 14.0, 113.0, 22.0 ],
+					"text" : "buffer lengthsArray"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-9",
+					"linecount" : 2,
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 139.656489014625549, 4.0, 100.0, 36.0 ],
+					"text" : "buffer hamming hamm"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-15",
+					"linecount" : 2,
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 20.437918028831461, 4.0, 100.0, 36.0 ],
+					"text" : "buffer audio sample"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-14",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 46.656489014625549, 707.0, 100.0, 22.0 ],
+					"text" : "out 1"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-5",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 46.656489014625549, 94.0, 100.0, 22.0 ],
+					"text" : "in 1"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-2",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 411.230959177017212, 77.0, 37.0, 22.0 ],
+					"text" : "in 2"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-3",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 366.535716235637665, 14.0, 137.0, 22.0 ],
+					"text" : "buffer channels"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"code" : "getNextChannel(data, last){\r\n\tval = -1;\r\n\tfor(i=0; i<dim(data); i+=1){\r\n\t\tindex = (last + i) % dim(data);\r\n\t\tif(data.peek(index) == -1){\r\n\t\t\tval = index;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\treturn val;\r\n}\r\n\r\ngetHammingValue(hammBuffer, channelValue){\r\n\thammValue = scale(channelValue, 0, 1, 0, 2048);\r\n\treturn hammBuffer.peek(round(hammValue));\r\n}\r\n\r\n\r\nif(in1 >= 0.0){\r\n\tfree = getNextChannel(channels, lastSample);\r\n\tlastSample = free;\r\n\tif(free != -1){\r\n\t\tchannels.poke(0, free);\r\n\t\tlengthsArray.poke(in2, free);\r\n\t\tstartArray.poke(in3, free);\r\n\t}\r\n}\r\n\r\nreturnSample = 0;\r\n\r\nfor(i = 0; i < dim(channels); i+=1){\r\n\tchannelVal = channels.peek(i);\r\n\tgrainMs = lengthsArray.peek(i);\r\n\tif(channelVal != -1){\r\n\tif(channelVal >= 1){\r\n\t\tchannels.poke(-1, i);\r\n\t\tlengthsArray.poke(-1, i);\r\n\t\tstartArray.poke(-1, i);\r\n\t}\r\n\telse{\r\n\t\tgrainLength = 1 / (grainMs * samplerate);\r\n\t\tstartSamp = (startArray.peek(i) / 1000) * samplerate;\r\n\t\t/*PROBLEM LINE OF CODE Grainlength is negative maybe?*/\r\n\t\tchannels.poke(channelVal + grainLength, i);\r\n\t\tscaledValue = scale(channelVal, 0, 1, startSamp, grainMs  * samplerate + startSamp);\r\n\t\tsample = audio.peek(round(scaledValue)) * getHammingValue(hamming, channelVal);\r\n\t\treturnSample += sample;\r\n\r\n\t}\t\r\n\t}\r\n}\r\n\r\nout1 = returnSample;\r\n//out5 = lastSample;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+					"fontface" : 0,
+					"fontname" : "Lucida Console",
+					"fontsize" : 12.0,
+					"id" : "obj-6",
+					"maxclass" : "codebox",
+					"numinlets" : 3,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 65.943724095821381, 138.267174243927002, 1112.148940324783325, 542.702127933502197 ]
+				}
+
+			}
+ ],
+		"lines" : [ 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 1 ],
+					"source" : [ "obj-1", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-2", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 2 ],
+					"source" : [ "obj-4", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 0 ],
+					"source" : [ "obj-5", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-14", 0 ],
+					"source" : [ "obj-6", 0 ]
+				}
+
+			}
+ ],
+		"autosave" : 0
+	}
+
+}

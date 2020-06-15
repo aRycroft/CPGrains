@@ -158,12 +158,13 @@ void MainComponent::makeNode(int x, int y)
     node->addComponentListener(this);
     node->setAlwaysOnTop(true);
     node->addMouseListener(this, false);
+    setter.setParam("active", node->getComponentID().getIntValue(), 0);
     nodePanel.resized();
 
     ValueTree nodeParam(node->getComponentID());
-    nodeParam.setProperty("grainLength", 50.0f, nullptr);
+    nodeParam.setProperty("grainLength", 200.0f, nullptr);
     nodeParam.setProperty("startTime", 0.0f, nullptr);
-    nodeParam.setProperty("frequency", 2.0f, nullptr);
+    nodeParam.setProperty("frequency", 1.0f, nullptr);
     nodeParam.setProperty("pan", 0.5f, nullptr);
     //nodeParam.setProperty("freq", 1.5f, nullptr);
     controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
