@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "CPGLookAndFeel.h"
 #include "CPGNode.h"
 #include "OSCParamSetter.h"
 #include <stack>
@@ -22,7 +23,6 @@
 */
 class MainComponent   : public Component,
                         public ComponentListener,
-                        public MouseListener,
                         public Button::Listener,
                         public Slider::Listener,
                         public FilenameComponentListener
@@ -80,16 +80,30 @@ private:
         OwnedArray<CPGConnection> allCons;
     };
 
-    struct controlsContainer : public Component{
+    struct controlsContainer : public Component,
+                               private ChangeListener{
 
-        controlsContainer(Slider::Listener* listener) {
+        controlsContainer(Slider::Listener* listener, LookAndFeel_V4* LandF)
+            :
+            waveformCache(5),
+            waveform(512, waveformManager, waveformCache)
+        {
+            waveformManager.registerBasicFormats();
+            waveform.addChangeListener(this);
             paramTree = ValueTree(Identifier("nodeParams"));
-            addSliders(listener);
+            addSliders(listener, LandF);
         }
 
         void paint(Graphics& g) override
         {
             g.fillAll(Colours::darkslategrey);
+
+            waveform.drawChannels(g,                                      // [9]
+                Rectangle<int>(100, 100),
+                0.0,                                    // start time
+                waveform.getTotalLength(),             // end time
+                1.0f);
+
         }
 
         void resized() override
@@ -98,15 +112,15 @@ private:
 
             using Track = Grid::TrackInfo;
             grid.templateRows = { Track(1_fr)};
-            grid.templateColumns = { Track(1_fr), Track(2_fr), 
-                                     Track(1_fr), Track(2_fr), 
-                                     Track(1_fr), Track(2_fr),
-                                     Track(1_fr), Track(2_fr),
-                                     Track(1_fr), Track(2_fr) };
+            grid.templateColumns = { Track(1_fr), Track(3_fr), 
+                                     Track(1_fr), Track(3_fr), 
+                                     Track(1_fr), Track(3_fr),
+                                     Track(1_fr), Track(3_fr),
+                                     Track(1_fr), Track(3_fr) };
             for (auto* s : sliders) {
                 GridItem g1 = GridItem(s);
-                g1.withAlignSelf(GridItem::AlignSelf::stretch);
-                g1.minWidth = 150.0f;
+                //g1.withAlignSelf(GridItem::AlignSelf::stretch);
+                //g1.minWidth = 130.0f;
                 //g1.minHeight = 150.0f;
                 grid.items.add(GridItem());
                 grid.items.add(g1);
@@ -114,9 +128,9 @@ private:
             }
         }
 
-        void addSliders(Slider::Listener* listener) {
+        void addSliders(Slider::Listener* listener, LookAndFeel_V4* LandF) {
             addChildComponent(sliders.add(new Slider("grainLength")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.01f, 0.25f));
+            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.1f, 0.25f));
             addChildComponent(labels.add(new Label()));
             Label* l = labels.getLast();
             l->setText("Grain Size", dontSendNotification);
@@ -151,6 +165,9 @@ private:
             l->attachToComponent(sliders.getLast(), true);
 
             for (auto* slider : sliders) {
+                slider->setLookAndFeel(LandF);
+                slider->setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxAbove, false, 40, 40);
+                slider->setNumDecimalPlacesToDisplay(1);
                 slider->setSliderStyle(Slider::Rotary);
                 slider->addListener(listener);
             }
@@ -175,6 +192,24 @@ private:
             frequencySlider->addListener(listener);
         }*/
 
+        void displayControls(String componentId) {
+            if (!displayingControls) {
+                showSliders(componentId);
+            }
+            else if (displayingWaveform) {
+                hideWaveform();
+            }
+        }
+
+        void displayWaveform() {
+            if (!displayingWaveform) {
+                showWaveform();
+            }
+            if (displayingControls) {
+                hideSliders();
+            }
+        }
+
         void showSliders(String componentId)
         {
             for (auto& slider : sliders) {
@@ -196,11 +231,31 @@ private:
             }
         }
 
+        void showWaveform() {
+
+        }
+        
+        void hideWaveform() {
+
+        }
+
+        void changeListenerCallback(ChangeBroadcaster* source) override
+        {
+            repaint();
+        }
+
+        AudioFormatManager waveformManager;
+        AudioThumbnailCache waveformCache;
+        AudioThumbnail waveform;
         ValueTree paramTree;
         OwnedArray<Slider> sliders;
         OwnedArray<Label> labels;
+        bool displayingControls{ false };
+        bool displayingWaveform{ false };
     };
 
+    
+    CPGLookAndFeel LandF;
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
     TextButton addNodeButton;

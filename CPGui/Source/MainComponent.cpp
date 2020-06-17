@@ -11,15 +11,10 @@
 //==============================================================================
 MainComponent::MainComponent()
     :nodePanel(NUM_NODES),
-    controlsPanel(this)
+    controlsPanel(this, &LandF)
 {
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
-    /*
-    controlsPanel.addSlider("grainLength", this, 5.0f, 5000.0f, 0.25f);
-    controlsPanel.addSlider("startTime", this, 0.0f, 1000.0f, 1.0f);
-    controlsPanel.addFrequencySlider(this);
-    controlsPanel.addSlider("frequency", this, -1.5f, 1.0f, 1.0f);*/
     nodePanel.setInterceptsMouseClicks(false, true);
 
     /*Extra main controls, could put these elsewhere?*/
@@ -87,9 +82,7 @@ void MainComponent::resized()
 
     grid.templateRows = { Track(5_fr), Track(1_fr) };
     grid.templateColumns = { Track(1_fr)};
-
-    grid.items = { GridItem(nodePanel), GridItem(controlsPanel)};
-
+    grid.items = { GridItem(nodePanel), GridItem(controlsPanel) };
     grid.performLayout(getLocalBounds());
 }
 
@@ -98,13 +91,14 @@ void MainComponent::mouseDown(const MouseEvent& e)
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (nodePanel.clickedNode != nullptr && node != 0 && e.mods.isShiftDown()) {
         makeConnection(nodePanel.clickedNode, node);
+        return;
     }
     if (nodePanel.clickedNode != nullptr) {
         nodePanel.clickedNode->setNodeColour(Colours::orange);
         nodePanel.clickedNode = nullptr;
         controlsPanel.hideSliders();
     }
-    if (node != 0) {
+    if(node != 0) {
         node->setNodeColour(Colours::white);
         nodePanel.clickedNode = node;
         controlsPanel.showSliders(node->getComponentID());

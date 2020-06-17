@@ -3,12 +3,11 @@
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
     <GROUP id="{4976BE13-9DE9-BEE3-C9C2-28EBF1027777}" name="Source">
-      <FILE id="PeTGxJ" name="ControlsListener.h" compile="0" resource="0"
-            file="Source/ControlsListener.h"/>
       <FILE id="obq48B" name="CPGConnection.cpp" compile="1" resource="0"
             file="Source/CPGConnection.cpp"/>
       <FILE id="DUhvpI" name="CPGConnection.h" compile="0" resource="0" file="Source/CPGConnection.h"/>
-      <FILE id="SnFuMC" name="CPGListener.h" compile="0" resource="0" file="Source/CPGListener.h"/>
+      <FILE id="Q5DmDI" name="CPGLookAndFeel.h" compile="0" resource="0"
+            file="Source/CPGLookAndFeel.h"/>
       <FILE id="UQ1RJy" name="CPGNode.cpp" compile="1" resource="0" file="Source/CPGNode.cpp"/>
       <FILE id="qOin7G" name="CPGNode.h" compile="0" resource="0" file="Source/CPGNode.h"/>
       <FILE id="FiMnrW" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -42,6 +41,7 @@
         <MODULEPATH id="juce_gui_extra" path="../../../../../Program Files/JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../../../../Program Files/JUCE/modules"/>
         <MODULEPATH id="juce_osc" path="../../../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../../../Program Files/JUCE/modules"/>
       </MODULEPATHS>
     </VS2019>
   </EXPORTFORMATS>
@@ -50,6 +50,7 @@
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

@@ -9,7 +9,6 @@
 */
 
 #pragma once
-#include <list>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "CPGConnection.h"
 class CPGNode : public Component
@@ -22,20 +21,14 @@ public:
 	void mouseDown(const MouseEvent& e) override;
 	void mouseDrag(const MouseEvent& e) override;
 	void mouseUp(const MouseEvent& event);
-	Array<std::shared_ptr<CPGConnection>>* getConnections();
-	bool addConnection(std::shared_ptr<CPGConnection> connection);
-	void removeConnection(CPGConnection* connection);
 	void setNodeColour(juce::Colour newColour);
 	void toggleActive() {
 		isActive = !isActive;
 	}
 	bool nodeIsActive() { return isActive; };
-	ValueTree tree;
 private:
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
-	Array<std::shared_ptr<CPGConnection>> connections{};
-	int xPos, yPos;
 	bool isActive{ true };
 	juce::Colour colour;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPGNode)

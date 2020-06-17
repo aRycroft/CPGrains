@@ -1,10 +1,25 @@
 ## Install + Run
-1. Download this repo to your max packages folder. https://github.com/DanBennettDev/max_cpg
-2. From CPG library run neurhythmicGUI in max_cpg-master\NeurythmicApp\gui\
-3. Download CPGrains repo and run CPGrains.maxpat, use presentation mode
-4. Add up to 4 nodes using neurhytmicGUI to control grain rhythms
+1. Download this https://github.com/DanBennettDev/max_cpg to your Max/MSP packages folder. 
+2. Download CPGrains repo and run CPGrains.maxpat, turn on the patch in the bottom right.
+3. Run CPGui.exe or .app to control the patch.
+
+##CPGui Controls
+First select a sample using the button in the top right. Then click add node to add up to four nodes. Each of these nodes controls the generation of a grain stream. 
+By selecting one node and shift-clicking another, a connection is formed between the nodes. By moving the grains around the screen the weight of each connection changes depending on the distance between the nodes.
+
+Shift-click : Create connection between nodes.
+Double-click : Disable node audio (the node still affects any nodes it is connected to)
+Clicking Connection : Deletes the connection.
+
 
 ## Project Log
+### 17th June
+Compiled a .app for Mac users. Updated readme to explain GUI controls, Video of the system in action -->https://www.youtube.com/watch?v=nNSVt3vGWyQ
+
+### 12th June
+Researched edge detection to use when triggering grain generation. Grains are triggered when an input CPG signal crosses a threshold of 0.5f then the signal direction is calculated and if it is positive a grain is trigered. 
+I have been focussing on UI to allow a user to only need the GUI to control the patch. After this will focus more on the Max patch side and maybe start converting the Max patch to JUCE/C++.
+
 ### 2nd June
 Another redo of grainGen now just one gen~ object with external buffers containing information for each track. In c++ this can all be converted to an array of objects probably. Also created a basic GUI in JUCE, connections can be added by shift-clicking. New nodes can be made by clicking the button. It's still nicer to use neurythmic gui so I'm using that for testing just now.
 Another addition is the ability to mute and pan grain channels. This is done by setting the detection threshold for a node to 0.

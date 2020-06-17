@@ -16,9 +16,6 @@ CPGNode::CPGNode(int nodeNo, int x, int y)
 	this->setComponentID(String(nodeNo));
 	this->setCentrePosition(x, y);	
 	setNodeColour(Colours::orange);
-	tree = ValueTree(Identifier("grainLength"));
-	tree.setProperty("grainLength", 200.0f, nullptr);
-	tree.setProperty(Identifier("startTime"), 0.0f, nullptr);
 }
 
 void CPGNode::paint(Graphics& g)
@@ -60,32 +57,6 @@ void CPGNode::mouseDrag(const MouseEvent& e)
 void CPGNode::mouseUp(const MouseEvent& event) {
 }
 
-Array<std::shared_ptr<CPGConnection>>* CPGNode::getConnections()
-{
-	return &connections;
-}
-
-bool CPGNode::addConnection(std::shared_ptr<CPGConnection> connection) {
-	if (connection->getParent() == connection->getConnected()) return false;
-	for (auto con: connections) {
-		if (con->getParent() == connection->getParent() && 
-			con->getConnected() == connection->getConnected()) {
-			return false;
-		}
-	}
-	connections.add(connection);
-	return true;
-}
-
-void CPGNode::removeConnection(CPGConnection* connection) {
-	std::shared_ptr<CPGConnection> toRemove;
-	for (auto conPTR : connections) {
-		if (conPTR.get() == connection) {
-			toRemove = conPTR;
-		}
-	}
-	connections.removeFirstMatchingValue(toRemove);
-}
 
 void CPGNode::setNodeColour(juce::Colour newColour)
 {
