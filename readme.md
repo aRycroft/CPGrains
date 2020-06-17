@@ -7,9 +7,9 @@
 First select a sample using the button in the top right. Then click add node to add up to four nodes. Each of these nodes controls the generation of a grain stream. 
 By selecting one node and shift-clicking another, a connection is formed between the nodes. By moving the grains around the screen the weight of each connection changes depending on the distance between the nodes.
 
-Shift-click : Create connection between nodes.
-Double-click : Disable node audio (the node still affects any nodes it is connected to)
-Clicking Connection : Deletes the connection.
+Shift-click : Create connection between nodes. <br/>
+Double-click : Disable node audio (the node still affects any nodes it is connected to)<br/>
+Clicking Connection : Deletes the connection.<br/>
 
 
 ## Project Log
