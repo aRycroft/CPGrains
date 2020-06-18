@@ -1,20 +1,22 @@
 ## Install + Run
 1. Download this https://github.com/DanBennettDev/max_cpg to your Max/MSP packages folder. 
-2. Download CPGrains repo and run CPGrains.maxpat, turn on the patch in the bottom right.
-3. Run CPGui.exe or .app to control the patch.
+2. Install the CNMAT externals from the Max/MSP package manager.
+3. Download CPGrains repo and run CPGrains.maxpat, turn on the patch in the bottom right.
+4. Run CPGui.exe or .app to control the patch.
 
-##CPGui Controls
+## CPGui Controls
 First select a sample using the button in the top right. Then click add node to add up to four nodes. Each of these nodes controls the generation of a grain stream. 
 By selecting one node and shift-clicking another, a connection is formed between the nodes. By moving the grains around the screen the weight of each connection changes depending on the distance between the nodes.
 
-Shift-click : Create connection between nodes.
-Double-click : Disable node audio (the node still affects any nodes it is connected to)
-Clicking Connection : Deletes the connection.
+Shift-click : Create connection between nodes. <br/>
+Double-click : Disable node audio (the node still affects any nodes it is connected to)<br/>
+Clicking Connection : Deletes the connection.<br/>
 
 
 ## Project Log
 ### 17th June
-Compiled a .app for Mac users. Updated readme to explain GUI controls, Video of the system in action -->https://www.youtube.com/watch?v=nNSVt3vGWyQ
+Compiled a .app for Mac users. Updated readme to explain GUI controls, Video of the system in action 
+https://www.youtube.com/watch?v=nNSVt3vGWyQ
 
 ### 12th June
 Researched edge detection to use when triggering grain generation. Grains are triggered when an input CPG signal crosses a threshold of 0.5f then the signal direction is calculated and if it is positive a grain is trigered. 
