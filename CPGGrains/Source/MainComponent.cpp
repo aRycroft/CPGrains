@@ -9,9 +9,12 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent()
-    :nodePanel(NUM_NODES),
-    controlsPanel(this, &LandF)
+MainComponent::MainComponent(AudioProcessor& p, AudioProcessorValueTreeState& state)
+    :AudioProcessorEditor(&p),
+    proc(p),
+    nodePanel(NUM_NODES),
+    params(state),
+    controlsPanel(params, this, &LandF)
 {
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
@@ -57,6 +60,7 @@ MainComponent::MainComponent()
     fileLabel.attachToComponent(fileComp.get(), true);
     addAndMakeVisible(&fileLabel);
 
+    setResizable(true, true);
     setSize (1000, 600);
     //makeControlNode(100, 100);
 }
@@ -154,9 +158,9 @@ void MainComponent::sliderValueChanged(Slider* slider)
 {
     CPGNode* clickedNode = nodePanel.clickedNode;
     if (clickedNode == nullptr) return;
-    ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
+    /*ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
     nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
-    setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
+    setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());*/
 }
 
 /*void MainComponent::makeControlNode(int x, int y) {
@@ -188,7 +192,7 @@ void MainComponent::makeNode(int x, int y)
     nodeParam.setProperty("pan", 0.5f, nullptr);
     nodeParam.setProperty("volume", 0.7f, nullptr);
     //nodeParam.setProperty("freq", 1.5f, nullptr);
-    controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
+    //controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
 }
 
 void MainComponent::makeConnection(CPGNode* from, CPGNode* to)

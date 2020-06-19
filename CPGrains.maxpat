@@ -117,7 +117,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
-					"patching_rect" : [ 246.245990991592407, 693.749490261077881, 100.0, 22.0 ],
+					"patching_rect" : [ 246.473908929824802, 709.190666437149048, 100.0, 22.0 ],
 					"text" : "greaterthan~ 0.5"
 				}
 
@@ -266,7 +266,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
 					"patching_rect" : [ 636.698753658384021, 621.664743185043335, 65.176414041817225, 36.0 ],
-					"text" : "thresh~ 0 0.5"
+					"text" : "thresh~ 0.5 0.5"
 				}
 
 			}
@@ -279,7 +279,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
 					"patching_rect" : [ 513.134626229504761, 621.664743185043335, 65.176414041817225, 36.0 ],
-					"text" : "thresh~ 0 0.5"
+					"text" : "thresh~ 0.5 0.5"
 				}
 
 			}
@@ -292,7 +292,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
 					"patching_rect" : [ 379.861622316886894, 621.664743185043335, 65.176414041817225, 36.0 ],
-					"text" : "thresh~ 0 0.5"
+					"text" : "thresh~ 0.5 0.5"
 				}
 
 			}
@@ -305,7 +305,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
 					"patching_rect" : [ 246.473908929824802, 621.664743185043335, 65.176414041817225, 36.0 ],
-					"text" : "thresh~ 0 0.5"
+					"text" : "thresh~ 0.5 0.5"
 				}
 
 			}
@@ -1833,7 +1833,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "multichannelsignal" ],
-					"patching_rect" : [ 246.473908929824802, 1065.0, 100.0, 22.0 ],
+					"patching_rect" : [ 246.473908929824802, 1079.70588207244873, 100.0, 22.0 ],
 					"text" : "mc.limi~"
 				}
 
@@ -3122,7 +3122,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "signal", "signal" ],
-					"patching_rect" : [ 246.473908929824802, 1107.0, 100.0, 22.0 ],
+					"patching_rect" : [ 246.473908929824802, 1121.70588207244873, 100.0, 22.0 ],
 					"text" : "mc.unpack~ 2"
 				}
 

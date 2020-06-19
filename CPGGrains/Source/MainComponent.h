@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "PluginProcessor.h"
 #include "CPGLookAndFeel.h"
 #include "CPGNode.h"
 #include "OSCParamSetter.h"
@@ -16,12 +17,15 @@
 
 #define NUM_NODES 4
 
+typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public Component,
+class MainComponent   : public AudioProcessorEditor,
+                        /*public Component,*/
                         public ComponentListener,
                         public Button::Listener,
                         public Slider::Listener,
@@ -29,21 +33,20 @@ class MainComponent   : public Component,
 {
 public:
     //==============================================================================
-    MainComponent();
+    MainComponent(AudioProcessor&, AudioProcessorValueTreeState&);
     ~MainComponent();
 
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    void mouseDown(const MouseEvent& e) override;
-    void mouseDoubleClick(const MouseEvent& event) override;
-    void buttonClicked(Button* button) override;
-    void sliderValueChanged(Slider* slider) override;
 private:
     void makeNode(int x, int y);
     void makeConnection(CPGNode* from, CPGNode* to);
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
-
+    void mouseDown(const MouseEvent& e) override;
+    void mouseDoubleClick(const MouseEvent& event) override;
+    void buttonClicked(Button* button) override;
+    void sliderValueChanged(Slider* slider) override;
     void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
 
     struct nodeContainer : public Component {
@@ -83,14 +86,15 @@ private:
     struct controlsContainer : public Component,
                                private ChangeListener{
 
-        controlsContainer(Slider::Listener* listener, LookAndFeel_V4* LandF)
+        controlsContainer(AudioProcessorValueTreeState& state, Slider::Listener* listener, LookAndFeel_V4* LandF)
             :
+            paramTree(state),
             waveformCache(5),
             waveform(512, waveformManager, waveformCache)
         {
             waveformManager.registerBasicFormats();
             waveform.addChangeListener(this);
-            paramTree = ValueTree(Identifier("nodeParams"));
+            //paramTree = ValueTree(Identifier("nodeParams"));
             addSliders(listener, LandF);
         }
 
@@ -117,11 +121,8 @@ private:
                                      Track(1_fr), Track(3_fr),
                                      Track(1_fr), Track(3_fr),
                                      Track(1_fr), Track(3_fr) };
-            for (auto* s : sliders) {
+            for (Slider* s : sliders) {
                 GridItem g1 = GridItem(s);
-                //g1.withAlignSelf(GridItem::AlignSelf::stretch);
-                //g1.minWidth = 130.0f;
-                //g1.minHeight = 150.0f;
                 grid.items.add(GridItem());
                 grid.items.add(g1);
                 grid.performLayout(getLocalBounds());
@@ -130,35 +131,30 @@ private:
 
         void addSliders(Slider::Listener* listener, LookAndFeel_V4* LandF) {
             addChildComponent(sliders.add(new Slider("grainLength")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.1f, 0.25f));
             addChildComponent(labels.add(new Label()));
             Label* l = labels.getLast();
             l->setText("Grain Size", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("startTime")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.01f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
             l->setText("Position", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("frequency")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.03125f, 16.0f, 0.01f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
             l->setText("Freq", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("pan")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
             l->setText("Pan", dontSendNotification);
             l->attachToComponent(sliders.getLast(), true);
 
             addChildComponent(sliders.add(new Slider("volume")));
-            sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
             addChildComponent(labels.add(new Label()));
             l = labels.getLast();
             l->setText("Volume", dontSendNotification);
@@ -167,30 +163,10 @@ private:
             for (auto* slider : sliders) {
                 slider->setLookAndFeel(LandF);
                 slider->setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxAbove, false, 40, 40);
-                slider->setNumDecimalPlacesToDisplay(1);
                 slider->setSliderStyle(Slider::Rotary);
                 slider->addListener(listener);
             }
         }
-
-        /*
-        void addSlider(String name, Slider::Listener* listener, double rangeStart, double rangeEnd, double skewFactor) {
-            addChildComponent(sliders.add(new Slider(name)));
-            Slider* slider = sliders.getLast();
-            slider->setSliderStyle(Slider::Rotary);
-            slider->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.01f, skewFactor));
-            slider->addListener(listener);
-        }
-
-        void addFrequencySlider(Slider::Listener* listener) {
-            addChildComponent(sliders.add(new Slider("frequency")));
-            Slider* frequencySlider = sliders.getLast();
-            frequencySlider->setNormalisableRange(NormalisableRange<double>(-1.5f, 1.0f, 0.25f));
-            frequencySlider->onValueChange = [this] {
-                DBG("Yah");
-            };
-            frequencySlider->addListener(listener);
-        }*/
 
         void displayControls(String componentId) {
             if (!displayingControls) {
@@ -212,9 +188,13 @@ private:
 
         void showSliders(String componentId)
         {
-            for (auto& slider : sliders) {
-                slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()], dontSendNotification);
+            attachments.clear();
+            for (auto* slider : sliders) {
                 slider->setVisible(true);
+                attachments.add(std::make_unique<SliderAttachment>(
+                    paramTree, 
+                    String(componentId) + slider->getName(),
+                    *slider));
             }
             for (auto& label : labels) {
                 label->setVisible(true);
@@ -247,14 +227,18 @@ private:
         AudioFormatManager waveformManager;
         AudioThumbnailCache waveformCache;
         AudioThumbnail waveform;
-        ValueTree paramTree;
+        
+        AudioProcessorValueTreeState& paramTree;
         OwnedArray<Slider> sliders;
+        OwnedArray<SliderAttachment> attachments;
         OwnedArray<Label> labels;
         bool displayingControls{ false };
         bool displayingWaveform{ false };
     };
 
-    
+
+    AudioProcessor& proc;
+    AudioProcessorValueTreeState& params;
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
