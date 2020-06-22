@@ -3,7 +3,48 @@
 <JUCERPROJECT id="DgPFEe" name="CPGGrains" projectType="audioplug" jucerVersion="5.4.5"
               pluginFormats="buildVST3" pluginCharacteristicsValue="pluginIsSynth">
   <MAINGROUP id="f4NyTV" name="CPGGrains">
+    <GROUP id="{CB1A3414-2A12-DC8C-EBCD-D2E5AA5C74EE}" name="CPGLib">
+      <FILE id="eQxcQz" name="CMakeLists.txt" compile="0" resource="1" file="Source/CPGLib/CMakeLists.txt"/>
+      <FILE id="Uu48vm" name="core.cpp" compile="1" resource="0" file="Source/CPGLib/core.cpp"/>
+      <FILE id="bP8hFo" name="core.h" compile="0" resource="0" file="Source/CPGLib/core.h"/>
+      <FILE id="Q8a6vC" name="CPG.cpp" compile="1" resource="0" file="Source/CPGLib/CPG.cpp"/>
+      <FILE id="BoT12E" name="CPG.h" compile="0" resource="0" file="Source/CPGLib/CPG.h"/>
+      <FILE id="s5VY3c" name="delayLine.h" compile="0" resource="0" file="Source/CPGLib/delayLine.h"/>
+      <FILE id="zUitI9" name="mainpage.dox" compile="0" resource="1" file="Source/CPGLib/mainpage.dox"/>
+      <FILE id="FiSO6H" name="Matsu_calcs.cpp" compile="1" resource="0" file="Source/CPGLib/Matsu_calcs.cpp"/>
+      <FILE id="pubiVR" name="Matsu_calcs.h" compile="0" resource="0" file="Source/CPGLib/Matsu_calcs.h"/>
+      <FILE id="ll17Tl" name="matsu_signal_calcs.c" compile="1" resource="0"
+            file="Source/CPGLib/matsu_signal_calcs.c"/>
+      <FILE id="vo18T4" name="matsu_signal_calcs.h" compile="0" resource="0"
+            file="Source/CPGLib/matsu_signal_calcs.h"/>
+      <FILE id="HScCTO" name="matsuNode.cpp" compile="1" resource="0" file="Source/CPGLib/matsuNode.cpp"/>
+      <FILE id="QaKf5r" name="matsuNode.h" compile="0" resource="0" file="Source/CPGLib/matsuNode.h"/>
+      <FILE id="C50e7r" name="MatsuokaEngine.cpp" compile="1" resource="0"
+            file="Source/CPGLib/MatsuokaEngine.cpp"/>
+      <FILE id="HO4Myo" name="MatsuokaEngine.h" compile="0" resource="0"
+            file="Source/CPGLib/MatsuokaEngine.h"/>
+      <FILE id="gUBUZj" name="MatsuokaEngine_src.vcxproj" compile="0" resource="1"
+            file="Source/CPGLib/MatsuokaEngine_src.vcxproj"/>
+      <FILE id="awKaCa" name="MatsuokaEngine_src.vcxproj.filters" compile="0"
+            resource="1" file="Source/CPGLib/MatsuokaEngine_src.vcxproj.filters"/>
+      <FILE id="tPB3ss" name="QuantisedEventQueue.cpp" compile="1" resource="0"
+            file="Source/CPGLib/QuantisedEventQueue.cpp"/>
+      <FILE id="G1MNvp" name="QuantisedEventQueue.h" compile="0" resource="0"
+            file="Source/CPGLib/QuantisedEventQueue.h"/>
+      <FILE id="U9SYmc" name="QuantiseGrid_soft.cpp" compile="1" resource="0"
+            file="Source/CPGLib/QuantiseGrid_soft.cpp"/>
+      <FILE id="h9dOBo" name="QuantiseGrid_soft.h" compile="0" resource="0"
+            file="Source/CPGLib/QuantiseGrid_soft.h"/>
+      <FILE id="zIcJT8" name="ReadMe.md" compile="0" resource="1" file="Source/CPGLib/ReadMe.md"/>
+      <FILE id="UhiQKT" name="ScalingCurve.cpp" compile="1" resource="0"
+            file="Source/CPGLib/ScalingCurve.cpp"/>
+      <FILE id="UmtgK4" name="ScalingCurve.h" compile="0" resource="0" file="Source/CPGLib/ScalingCurve.h"/>
+      <FILE id="itmb1y" name="XORRand.cpp" compile="1" resource="0" file="Source/CPGLib/XORRand.cpp"/>
+      <FILE id="kUdhz2" name="XORRand.h" compile="0" resource="0" file="Source/CPGLib/XORRand.h"/>
+    </GROUP>
     <GROUP id="{EAEE1BD4-244B-2D10-856D-900B8099A5F9}" name="Source">
+      <FILE id="EC4DVl" name="TriggerDetector.h" compile="0" resource="0"
+            file="Source/TriggerDetector.h"/>
       <FILE id="NURB4h" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="bFIHEb" name="PluginProcessor.h" compile="0" resource="0"
