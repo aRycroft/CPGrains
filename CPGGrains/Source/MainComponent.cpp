@@ -9,7 +9,8 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent(AudioProcessor& p, AudioProcessorValueTreeState& state)
+/*
+MainComponent::MainComponent(CpggrainsAudioProcessor& p, AudioProcessorValueTreeState& state)
     :AudioProcessorEditor(&p),
     proc(p),
     nodePanel(NUM_NODES),
@@ -20,7 +21,6 @@ MainComponent::MainComponent(AudioProcessor& p, AudioProcessorValueTreeState& st
     addAndMakeVisible(controlsPanel);
     nodePanel.setInterceptsMouseClicks(false, true);
 
-    /*Extra main controls, could put these elsewhere?*/
     mainFreqSlider.setSliderStyle(Slider::SliderStyle::Rotary);
     mainFreqSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxRight, false, 50, 20);
     mainFreqSlider.setNormalisableRange(NormalisableRange<double>(0.01, 200.0f, 0.0001f, 1.0f));
@@ -158,10 +158,14 @@ void MainComponent::sliderValueChanged(Slider* slider)
 {
     CPGNode* clickedNode = nodePanel.clickedNode;
     if (clickedNode == nullptr) return;
+
+
+
+    */
     /*ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
     nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
     setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());*/
-}
+//}
 
 /*void MainComponent::makeControlNode(int x, int y) {
     nodePanel.addAndMakeVisible(nodePanel.allNodes.add(new ControlNode(0, x, y)));
@@ -171,7 +175,7 @@ void MainComponent::sliderValueChanged(Slider* slider)
     node->addMouseListener(this, false);
     nodePanel.resized();
 }*/
-
+/*
 void MainComponent::makeNode(int x, int y)
 {
     if (nodePanel.availableNodes.empty()) return;
@@ -235,5 +239,6 @@ void MainComponent::filenameComponentChanged(FilenameComponent* fileComponentTha
     }
 }
 
-    
+    */
+
 

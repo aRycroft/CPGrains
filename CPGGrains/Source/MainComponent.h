@@ -6,7 +6,7 @@
   ==============================================================================
 */
 
-#pragma once
+/*#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
@@ -20,12 +20,8 @@
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
 //==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
+
 class MainComponent   : public AudioProcessorEditor,
-                        /*public Component,*/
                         public ComponentListener,
                         public Button::Listener,
                         public Slider::Listener,
@@ -33,7 +29,7 @@ class MainComponent   : public AudioProcessorEditor,
 {
 public:
     //==============================================================================
-    MainComponent(AudioProcessor&, AudioProcessorValueTreeState&);
+    MainComponent(CpggrainsAudioProcessor&, AudioProcessorValueTreeState&);
     ~MainComponent();
 
     //==============================================================================
@@ -53,7 +49,7 @@ private:
         nodeContainer(int numNodes) {
             allNodes.ensureStorageAllocated(NUM_NODES);
             allCons.ensureStorageAllocated(NUM_NODES * NUM_NODES);
-            for (int i = NUM_NODES; i > 0; i--) {
+            for (int i = NUM_NODES; i >= 0; i--) {
                 availableNodes.push(i);
             }
         }
@@ -236,8 +232,7 @@ private:
         bool displayingWaveform{ false };
     };
 
-
-    AudioProcessor& proc;
+    CpggrainsAudioProcessor& proc;
     AudioProcessorValueTreeState& params;
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
@@ -251,3 +246,4 @@ private:
     bool DSPOn{ false };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
+*/

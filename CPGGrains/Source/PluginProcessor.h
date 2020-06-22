@@ -13,11 +13,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
 #include "Grain.h"
+#include "GrainGenerator.h"
+#include <list>
 
 //==============================================================================
 /**
 */
-class CpggrainsAudioProcessor  : public AudioProcessor
+class CpggrainsAudioProcessor  : public AudioProcessor,
+    public AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -33,6 +36,8 @@ public:
    #endif
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+
+    void processSample(Grain* g, int currentIndex, float* LWritePointer, float* RWritePointer, float sampleValue);
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
@@ -57,21 +62,29 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //==============================================================================
+    void parameterChanged(const String& parameterID, float	newValue) override;
+    void setNodeFrequency(int nodeNumber, double freq);
+
 private:
     int chooseFile();
     std::tuple<int, int> getStartAndEndSample(int nodeNumber, int endOfSample);
     AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
     int numSamples, sampleSR;
-    unsigned tick = 0;
     std::unique_ptr<Grain> test;
+    GrainGenerator generators[5];
+    Grain grains[128];
+    std::list<Grain*> grainList;
     OwnedArray<Grain> allGrains;
 
     AudioProcessorValueTreeState grainParams;
-
     AudioFormatManager formatManager;
     AudioSampleBuffer fileBuffer;
     const float* readPointer;
+    std::unique_ptr<MatsuokaEngine> network;
+    uint16 tick = 0;
+    unsigned maxGrains = 50, currentNumGrains = 0;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CpggrainsAudioProcessor)
 };

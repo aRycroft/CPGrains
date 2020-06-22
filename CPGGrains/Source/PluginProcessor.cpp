@@ -14,20 +14,37 @@
 //==============================================================================
 CpggrainsAudioProcessor::CpggrainsAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput("Input", AudioChannelSet::stereo(), true)
+#endif
+        .withOutput("Output", AudioChannelSet::stereo(), true)
+#endif
+    )
 #endif
     ,
     grainParams(*this, nullptr, Identifier("Params"), createParameterLayout())
 {
+    for (int i = 0; i < 4; i++) {
+        grainParams.addParameterListener(String(i) + "frequency", this);
+    }
+
+    network = std::make_unique<MatsuokaEngine>();
+    network->setFreqCompensation(0.973200f);
+    network->addNode(1);
+    network->addNode(2);
+    //network->addNode(3);
+    //network->addNode(4);
+    //network->calibrate();
+
+    //allGrains.ensureStorageAllocated(1000);
     formatManager.registerBasicFormats();
     numSamples = chooseFile();
+
+    //network.addChild(0, 1);
+    //generators.add(std::unique_ptr<GrainGenerator>());
+    
     //allGrains.add(new Grain(1000, 441000));
 }
 
@@ -100,7 +117,7 @@ void CpggrainsAudioProcessor::changeProgramName (int index, const String& newNam
 //==============================================================================
 void CpggrainsAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-
+    //network->calibrate();
 }
 
 void CpggrainsAudioProcessor::releaseResources()
@@ -132,34 +149,100 @@ bool CpggrainsAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
   #endif
 }
 #endif
-
 void CpggrainsAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-    auto* writePointer = buffer.getWritePointer(0);
-    if (tick++ % 1 == 0) {
-        allGrains.add(new Grain(getStartAndEndSample(0, numSamples)));
-    }
-
+    auto* leftPointer = buffer.getWritePointer(0);
+    auto* rightPointer = buffer.getWritePointer(1);
+    network->doQueuedActions();
+    
     for (int i = 0; i < buffer.getNumSamples(); i++) {
-        double outSample = 0;
-        for (int i = 0; i < allGrains.size(); i++) {
-            auto g = allGrains[i];
-            int grainSample = g->nextSampleIndex();
-            if (grainSample == -1) {
-                allGrains.remove(i);
-            }
-            else {
-                /*double grainSample = g->nextSampleIndex();
-                grainSample = grainSample * sampleSR / getSampleRate();*/
-                outSample += readPointer[grainSample];
+        if (grainList.size() <= maxGrains) {
+            for (auto node : network->getNodeList()) {
+                GrainGenerator* grainGen = &generators[node];
+                grainGen->checkTrigger(node, network->getNodeOutput(node));
+                int grainChannel = grainGen->getGrain();
+                while (grainChannel != -1) {
+                    /*int i = 0;
+                    Grain* g = &grains[i];
+                    while (i < 256 && !g->grainIsPlaying()) {
+                        g = &grains[i];
+                        i++;
+                    }*/
+                    float* pan = grainParams.getRawParameterValue(String(grainChannel) + "pan");
+                    float* volume = grainParams.getRawParameterValue(String(grainChannel) + "volume");
+                    /*g->setStartAndEnd(getStartAndEndSample(grainChannel, numSamples));
+                    g->setPan(*pan);
+                    g->setVolume(*volume);
+                    g->setPlaying(true);*/
+                    grainList.push_back(new Grain(getStartAndEndSample(grainChannel, numSamples), *pan, *volume));
+                    grainChannel = grainGen->getGrain();
+                }
             }
         }
-        writePointer[i] = outSample;
+        std::list<Grain*>::iterator it = grainList.begin();
+        while (it != grainList.end())
+        {
+            int grainSample = (*it)->nextSampleIndex();
+            if (grainSample == -1)
+            {
+                grainList.erase(it++);  // alternatively, i = items.erase(i);
+            }
+            else
+            {
+                processSample((*it), i, leftPointer, rightPointer, readPointer[grainSample]);
+                ++it;
+            }
+        }
+
+        /*
+        for (int j = 0; j < 256; j++) {
+            Grain* g = &grains[j];
+            int grainSample = g->nextSampleIndex();
+            if (grainSample == -1) {
+                g->setPlaying(false);
+            }
+            else if (g->grainIsPlaying()) {
+                processSample(g, i, leftPointer, rightPointer, readPointer[grainSample]);
+            }
+        }
+
+        for (int j = 0; j < allGrains.size(); j++) {
+            auto* g = allGrains[j];
+            int grainSample = g->nextSampleIndex();
+            if (grainSample == -1) {
+                allGrains.remove(j);
+            }
+            else {
+                //matsuOutput[i] = 0;
+                //writePointer[i] = 0;
+                
+                //float leftOut = readPointer[grainSample] * std::fmin(1.0 - g->getPan(), 1.0);
+                //float rightOut = readPointer[grainSample] * std::fmin(1.0 + *pan, 1.0);
+                //outSample += leftOut;
+                //RWritePointer[currentIndex] += rightOut;
+                processSample(g, i, leftPointer, rightPointer, readPointer[grainSample]);
+                //double grainSample = g->nextSampleIndex();
+                //grainSample = grainSample * sampleSR / getSampleRate()
+                //outSample += readPointer[grainSample];
+            }
+        }*/
+        //writePointer[i] = outSample;
+        //matsuOutput[i] = network->getNodeOutput(0);
+        //writePointer[i] = network->getNodeOutput(1);
+        network->stepBareBones();
     }
 }
+
+void CpggrainsAudioProcessor::processSample(Grain* g, int currentIndex, float* LWritePointer, float* RWritePointer, float sampleValue) {
+    float leftOut = sampleValue * std::fmin(1.0 - g->getPan(), 1.0);
+    float rightOut = sampleValue * std::fmin(1.0 + g->getPan(), 1.0);
+    LWritePointer[currentIndex] += leftOut * g->getVolume();
+    RWritePointer[currentIndex] += rightOut * g->getVolume();
+}
+
 
 //==============================================================================
 bool CpggrainsAudioProcessor::hasEditor() const
@@ -169,7 +252,7 @@ bool CpggrainsAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* CpggrainsAudioProcessor::createEditor()
 {
-    return new MainComponent (*this, grainParams);
+    return new CpggrainsAudioProcessorEditor (*this, grainParams);
 }
 
 //==============================================================================
@@ -184,6 +267,18 @@ void CpggrainsAudioProcessor::setStateInformation (const void* data, int sizeInB
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+void CpggrainsAudioProcessor::parameterChanged(const String& parameterID, float newValue)
+{
+    auto nodeNumber = parameterID.getCharPointer();
+    int node = nodeNumber.getIntValue64();
+    network->setNodeFrequency(node, newValue, false);
+}
+
+void CpggrainsAudioProcessor::setNodeFrequency(int nodeNumber, double freq)
+{
+    //network->calibrate();
 }
 
 int CpggrainsAudioProcessor::chooseFile()
@@ -228,12 +323,12 @@ std::tuple<int, int> CpggrainsAudioProcessor::getStartAndEndSample(int nodeNumbe
 AudioProcessorValueTreeState::ParameterLayout CpggrainsAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<AudioParameterFloat>> params;
-    for (int i = 1; i <= 4; i++) {
+    for (int i = 0; i <= 4; i++) {
         params.push_back(std::make_unique<AudioParameterFloat>(
             String(i) + "grainLength",
             "Grain Length" + String(i),
             NormalisableRange<float>(0.001f, 5000.0f, 0.001f),
-            500.0f,
+            50.0f,
             String(),
             AudioProcessorParameter::genericParameter,
             [](float value, int) { return String(value, 1); },
@@ -261,8 +356,8 @@ AudioProcessorValueTreeState::ParameterLayout CpggrainsAudioProcessor::createPar
         params.push_back(std::make_unique<AudioParameterFloat>(
             String(i) + "pan",
             "Pan" + String(i),
-            NormalisableRange<float>(0.0f, 1.0f, 0.001f, 1.0f),
-            0.5f,
+            NormalisableRange<float>(-1.0f, 1.0f, 0.001f, 1.0f),
+            0.0f,
             String(),
             AudioProcessorParameter::genericParameter,
             [](float value, int) { return String(value, 1); },
