@@ -17,7 +17,6 @@
 #include "OSCParamSetter.h"
 #include <stack>
 
-#define NUM_NODES 4
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 //==============================================================================
@@ -51,7 +50,7 @@ private:
         nodeContainer(int numNodes) {
             allNodes.ensureStorageAllocated(NUM_NODES);
             allCons.ensureStorageAllocated(NUM_NODES * NUM_NODES);
-            for (int i = NUM_NODES; i >= 0; i--) {
+            for (int i = NUM_NODES; i > 0; i--) {
                 availableNodes.push(i);
             }
         }
@@ -100,10 +99,10 @@ private:
         {
             g.fillAll(Colours::darkslategrey);
 
-            waveform.drawChannels(g,                                      // [9]
+            waveform.drawChannels(g,                                     
                 Rectangle<int>(100, 100),
-                0.0,                                    // start time
-                waveform.getTotalLength(),             // end time
+                0.0,                                    
+                waveform.getTotalLength(),            
                 1.0f);
 
         }
@@ -239,11 +238,13 @@ private:
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
     controlsContainer controlsPanel;
+
     TextButton addNodeButton;
     ToggleButton DSPButton;
     Slider mainFreqSlider;
-    std::unique_ptr<FilenameComponent> fileComp;
     Label addButtonLabel, mFreqLabel, fileLabel, DSPLabel;
+
+    std::unique_ptr<FilenameComponent> fileComp;
     OSCParamSetter setter{ 8000 };
     bool DSPOn{ false };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CpggrainsAudioProcessorEditor)

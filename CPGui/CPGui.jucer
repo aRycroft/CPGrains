@@ -2,24 +2,28 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
-    <GROUP id="{4976BE13-9DE9-BEE3-C9C2-28EBF1027777}" name="Source">
-      <FILE id="obq48B" name="CPGConnection.cpp" compile="1" resource="0"
-            file="Source/CPGConnection.cpp"/>
-      <FILE id="DUhvpI" name="CPGConnection.h" compile="0" resource="0" file="Source/CPGConnection.h"/>
-      <FILE id="Q5DmDI" name="CPGLookAndFeel.h" compile="0" resource="0"
-            file="Source/CPGLookAndFeel.h"/>
-      <FILE id="UQ1RJy" name="CPGNode.cpp" compile="1" resource="0" file="Source/CPGNode.cpp"/>
-      <FILE id="qOin7G" name="CPGNode.h" compile="0" resource="0" file="Source/CPGNode.h"/>
-      <FILE id="FiMnrW" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="Fw7J7m" name="MainComponent.cpp" compile="1" resource="0"
-            file="Source/MainComponent.cpp"/>
-      <FILE id="FG8VDd" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="mv06jI" name="OSCParamSetter.cpp" compile="1" resource="0"
-            file="Source/OSCParamSetter.cpp"/>
-      <FILE id="wDUu4Q" name="OSCParamSetter.h" compile="0" resource="0"
-            file="Source/OSCParamSetter.h"/>
-      <FILE id="CXMLT1" name="ParamSetter.h" compile="0" resource="0" file="Source/ParamSetter.h"/>
-    </GROUP>
+    <FILE id="W9NlFQ" name="ConnectionControls.h" compile="0" resource="0"
+          file="Source/ConnectionControls.h"/>
+    <FILE id="M0TpRT" name="ControlInterface.h" compile="0" resource="0"
+          file="Source/ControlInterface.h"/>
+    <FILE id="erTFLy" name="NodeControls.h" compile="0" resource="0" file="Source/NodeControls.h"/>
+    <FILE id="qWHuMw" name="CPGConnection.cpp" compile="1" resource="0"
+          file="Source/CPGConnection.cpp"/>
+    <FILE id="CgoYiO" name="CPGConnection.h" compile="0" resource="0" file="Source/CPGConnection.h"/>
+    <FILE id="dgdlTL" name="CPGLookAndFeel.h" compile="0" resource="0"
+          file="Source/CPGLookAndFeel.h"/>
+    <FILE id="J2OINS" name="CPGNode.cpp" compile="1" resource="0" file="Source/CPGNode.cpp"/>
+    <FILE id="dOBjoJ" name="CPGNode.h" compile="0" resource="0" file="Source/CPGNode.h"/>
+    <FILE id="MAGYrF" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    <FILE id="lDp1YE" name="MainComponent.cpp" compile="1" resource="0"
+          file="Source/MainComponent.cpp"/>
+    <FILE id="U8Koas" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+    <FILE id="lj56TU" name="NodePanel.h" compile="0" resource="0" file="Source/NodePanel.h"/>
+    <FILE id="k589k9" name="OSCParamSetter.cpp" compile="1" resource="0"
+          file="Source/OSCParamSetter.cpp"/>
+    <FILE id="ipTDlx" name="OSCParamSetter.h" compile="0" resource="0"
+          file="Source/OSCParamSetter.h"/>
+    <FILE id="lPTqRh" name="ParamSetter.h" compile="0" resource="0" file="Source/ParamSetter.h"/>
   </MAINGROUP>
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019">

@@ -224,12 +224,20 @@ void CpggrainsAudioProcessorEditor::componentMovedOrResized(Component& movedComp
         con->recalculatePath();
         nodePanel.repaint();
         if (con->getParent() == node || con->getConnected() == node) {
-            setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
+            proc.setWeight(con->getConnected()->getComponentID().getIntValue(),
                 con->getParent()->getComponentID().getIntValue(),
                 con->calculateWeight()
             );
         }
     }
+    RangedAudioParameter* xPosition = params.getParameter(String(node->getComponentID()) + "x");
+    RangedAudioParameter* yPosition = params.getParameter(String(node->getComponentID()) + "y");
+    float x = (float)node->getX();
+    float xBounds = (float)node->getParentWidth() - node->getWidth();
+    xPosition->setValueNotifyingHost(x / xBounds);
+    float y = (float)node->getY();
+    float yBounds = (float)node->getParentHeight() - node->getHeight();
+    yPosition->setValueNotifyingHost(y / yBounds);
 }
 
 void CpggrainsAudioProcessorEditor::filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged)

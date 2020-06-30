@@ -12,10 +12,6 @@
 
 class Grain {
 public:
-    Grain() {
-        isPlaying = false;
-    }
-
     Grain(std::tuple<int, int> startAndEnd, float pan, float volume) {
         currentIndex = std::get<0>(startAndEnd);
         maxIndex = std::get<1>(startAndEnd);
@@ -28,37 +24,17 @@ public:
         maxIndex = std::get<1>(startAndEnd);
     }
 
-    int nextSampleIndex() {
+    int getSampleIndex() {
         if (currentIndex > maxIndex) {
             return -1;
         }
         else {
-            return currentIndex++;
+            return currentIndex;
         }
     }
 
-    void setPlaying(bool isPlaying) {
-        this->isPlaying = isPlaying;
-    }
-
-    bool grainIsPlaying() {
-        return isPlaying;
-    }
-
-    void setPan(float pan) {
-        this->pan = pan;
-    }
-
-    float getPan() {
-        return pan;
-    }
-    
-    void setVolume(float volume) {
-        this->volume = volume;
-    }
-
-    float getVolume() {
-        return volume;
+    void step() {
+        currentIndex++;
     }
 
 private:

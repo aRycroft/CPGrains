@@ -11,10 +11,12 @@
 //==============================================================================
 MainComponent::MainComponent()
     :nodePanel(NUM_NODES),
-    controlsPanel(this, &LandF)
+    controlsPanel(this, &LandF),
+    connectionPanel(this, &LandF)
 {
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
+    addAndMakeVisible(connectionPanel);
     nodePanel.setInterceptsMouseClicks(false, true);
 
     /*Extra main controls, could put these elsewhere?*/
@@ -56,9 +58,8 @@ MainComponent::MainComponent()
     fileLabel.setText("Choose Sample", dontSendNotification);
     fileLabel.attachToComponent(fileComp.get(), true);
     addAndMakeVisible(&fileLabel);
-
+    currentPanel = nullptr;
     setSize (1000, 600);
-    //makeControlNode(100, 100);
 }
 
 MainComponent::~MainComponent()
@@ -88,38 +89,55 @@ void MainComponent::resized()
 
     grid.templateRows = { Track(5_fr), Track(1_fr) };
     grid.templateColumns = { Track(1_fr)};
-    grid.items = { GridItem(nodePanel), GridItem(controlsPanel) };
+    grid.items = { GridItem(nodePanel), GridItem(currentPanel) };
     grid.performLayout(getLocalBounds());
 }
 
 void MainComponent::mouseDown(const MouseEvent& e)
 {
+    if (currentPanel != nullptr) {
+        currentPanel->setVisible(false);
+        currentPanel = nullptr;
+    }
+
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (nodePanel.clickedNode != nullptr && node != 0 && e.mods.isShiftDown()) {
         makeConnection(nodePanel.clickedNode, node);
-        return;
     }
     if (nodePanel.clickedNode != nullptr) {
         nodePanel.clickedNode->setNodeColour(Colours::orange);
         nodePanel.clickedNode = nullptr;
-        controlsPanel.hideSliders();
     }
     if(node != 0) {
         node->setNodeColour(Colours::white);
         nodePanel.clickedNode = node;
-        controlsPanel.showSliders(node->getComponentID());
+        controlsPanel.setUpAttachments(node->getComponentID());
+        currentPanel = &controlsPanel;
+        currentPanel->setVisible(true);
+        resized();
         return;
     }
-    CPGConnection* clickedConnection;
+
     for (auto con : nodePanel.allCons) {
         if (con->getPath().contains(e.getMouseDownPosition().toFloat())) {
-            clickedConnection = con;
-            setter.setWeight(nodePanel.allCons.getLast()->getConnected()->getComponentID().getIntValue(),
-                nodePanel.allCons.getLast()->getParent()->getComponentID().getIntValue(),
-                0.0f
-            );
-            nodePanel.allCons.removeObject(con);
-            nodePanel.repaint();
+            connectionPanel.setUpAttachments(con->getParent()->getComponentID()
+                                           + con->getConnected()->getComponentID());
+            connectionPanel.setVisible(true);
+            currentPanel = &connectionPanel;
+            nodePanel.clickedConnection = con;
+            resized();
+            PopupMenu m;
+            m.addItem(1, "Delete Connection");
+            const int result = m.show();
+            if (result == 1)
+            {
+                setter.setWeight(nodePanel.allCons.getLast()->getConnected()->getComponentID().getIntValue(),
+                    nodePanel.allCons.getLast()->getParent()->getComponentID().getIntValue(),
+                    0.0f
+                );
+                nodePanel.allCons.removeObject(con);
+                nodePanel.repaint();
+            }
             return;
         }
     }
@@ -153,20 +171,18 @@ void MainComponent::buttonClicked(Button* button)
 void MainComponent::sliderValueChanged(Slider* slider)
 {
     CPGNode* clickedNode = nodePanel.clickedNode;
-    if (clickedNode == nullptr) return;
-    ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
-    nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
-    setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
+    if (clickedNode != nullptr) {
+        ValueTree nodeTree = controlsPanel.paramTree.getChildWithName(clickedNode->getComponentID());
+        nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
+        setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
+    }
+    CPGConnection* clickedCon = nodePanel.clickedConnection;
+    if (clickedCon != nullptr) {
+        ValueTree conTree = connectionPanel.paramTree.getChildWithName(clickedCon->getId());
+        conTree.setProperty(slider->getName(), slider->getValue(), nullptr);
+        setter.setParam(slider->getName(), clickedCon->getId().toString().getIntValue(), slider->getValue());
+    }
 }
-
-/*void MainComponent::makeControlNode(int x, int y) {
-    nodePanel.addAndMakeVisible(nodePanel.allNodes.add(new ControlNode(0, x, y)));
-    CPGNode* node = nodePanel.allNodes.getLast();
-    node->addComponentListener(this);
-    node->setAlwaysOnTop(true);
-    node->addMouseListener(this, false);
-    nodePanel.resized();
-}*/
 
 void MainComponent::makeNode(int x, int y)
 {
@@ -187,7 +203,6 @@ void MainComponent::makeNode(int x, int y)
     nodeParam.setProperty("frequency", 1.0f, nullptr);
     nodeParam.setProperty("pan", 0.5f, nullptr);
     nodeParam.setProperty("volume", 0.7f, nullptr);
-    //nodeParam.setProperty("freq", 1.5f, nullptr);
     controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
 }
 
@@ -200,13 +215,18 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
             return;
         }
     }
-    nodePanel.allCons.add(new CPGConnection(from, to));
-    nodePanel.allCons.getLast()->recalculatePath();
+    CPGConnection* con = nodePanel.allCons.add(new CPGConnection(from, to));
+    con->recalculatePath();
     setter.setWeight(nodePanel.allCons.getLast()->getConnected()->getComponentID().getIntValue(),
                     nodePanel.allCons.getLast()->getParent()->getComponentID().getIntValue(),
-                    nodePanel.allCons.getLast()->calculateWeight()
+                    nodePanel.allCons.getLast()->calculateWeight(1.0)
     );
     nodePanel.repaint();
+    ValueTree conParam(con->getId());
+    conParam.setProperty("weight", 1.0f, nullptr);
+    conParam.setProperty("lengthWeight", 0.0f, nullptr);
+    conParam.setProperty("startWeight", 0.0f, nullptr);
+    connectionPanel.paramTree.addChild(conParam, -1, nullptr);
 }
 
 void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
@@ -216,9 +236,11 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
         con->recalculatePath();
         nodePanel.repaint();
         if (con->getParent() == node || con->getConnected() == node) {
+            ValueTree conParams = connectionPanel.paramTree.getChildWithName(con->getId());
+            double weightMult = conParams.getPropertyAsValue("weight", nullptr).getValue();
             setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
                 con->getParent()->getComponentID().getIntValue(),
-                con->calculateWeight()
+                con->calculateWeight(weightMult)
             );
         }
     }

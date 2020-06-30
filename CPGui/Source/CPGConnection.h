@@ -13,18 +13,14 @@
 class CPGConnection
 {
 public:
-    CPGConnection(Component* parent, Component* connectedTo)
-    { 
-        this->parent = parent;
-        this->connectedTo = connectedTo; 
-    };
-    Component* getConnected() { return connectedTo; };
-    Component* getParent() { return parent; };
+    CPGConnection(Component* parent, Component* connectedTo);
+    Component* getConnected();
+    Component* getParent();
+    Identifier getId();
     int weight = 0;
     void recalculatePath();
-    float getAngle();
     Path getPath();
-    float calculateWeight();
+    float calculateWeight(double mult);
 private:
     static Point<int> getCentre(Component* comp);
     Component *connectedTo, *parent;
