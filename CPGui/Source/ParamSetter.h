@@ -16,6 +16,7 @@ class ParamSetter
 public:
     virtual void setWeight(int currentNode, int targetNode, float weight) = 0;
     virtual void setParam(String toSet, int nodeNo, float value) = 0;
+    virtual void setConParam(String toSet, int from, int to, float value) = 0;
     virtual void setFile(String filePath) = 0;
     virtual void setDSPState(bool DSPon) = 0;
 };

@@ -34,7 +34,9 @@ struct ConnectionControls : public ControlInterface {
 
         using Track = Grid::TrackInfo;
         grid.templateRows = { Track(1_fr) };
-        grid.templateColumns = { Track(1_fr), Track(1_fr) };
+        grid.templateColumns = { Track(1_fr), Track(3_fr), 
+                                 Track(1_fr), Track(3_fr),
+                                 Track(1_fr), Track(3_fr) };
         for (auto* s : sliders) {
             GridItem g1 = GridItem(s);
             grid.items.add(GridItem());
@@ -45,7 +47,7 @@ struct ConnectionControls : public ControlInterface {
 
     void addSliders(Slider::Listener* listener, LookAndFeel_V4* LandF) {
         addAndMakeVisible(sliders.add(new Slider("weight")));
-        sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
+        sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 20.0f, 0.001f, 1.0f));
         addAndMakeVisible(labels.add(new Label()));
         Label* l = labels.getLast();
         l->setText("Weight", dontSendNotification);

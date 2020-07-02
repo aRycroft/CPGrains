@@ -18,6 +18,7 @@ public:
     OSCParamSetter(int portNumber);
     void setWeight(int currentNode, int targetNode, float weight) override;
     void setParam(String toSet, int nodeNo, float value) override;
+    void setConParam(String toSet, int from, int to, float value) override;
     void setFile(String filePath) override;
     void setDSPState(bool DSPon) override;
 private:

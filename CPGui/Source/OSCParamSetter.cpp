@@ -38,6 +38,12 @@ void OSCParamSetter::setParam(String toSet, int nodeNo, float value)
     sender.send(msg, value);
 }
 
+void OSCParamSetter::setConParam(String toSet, int from, int to, float value) {
+    String msg;
+    msg << "/Concontrol/" << to << "/" << toSet << "/" << from;
+    sender.send(msg, value);
+}
+
 void OSCParamSetter::setFile(String filePath)
 {
     String msg;

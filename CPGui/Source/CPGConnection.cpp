@@ -55,8 +55,10 @@ float CPGConnection::calculateWeight(double mult)
     juce::Point<int> pos1 = CPGConnection::getCentre(parent);
     juce::Point<int> pos2 = CPGConnection::getCentre(connectedTo);
 
-    float weight = sqrt(pow(pos2.getX() - pos1.getX(), 2) + pow(pos2.getY() - pos1.getY(), 2) * mult);
-    return std::max<float>(1 + (-1 * (weight - 0) / 300), 0.0f);
+    float radius = parent->getBounds().getWidth() / 2;
+    float weight = sqrt(pow(pos2.getX() - pos1.getX(), 2) + pow(pos2.getY() - pos1.getY(), 2) * 1.0f) - radius * 2;
+    int strength = 200 * mult;
+    return std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f);
 }
 
 juce::Point<int> CPGConnection::getCentre(Component* comp)

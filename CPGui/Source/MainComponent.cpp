@@ -76,8 +76,6 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     int width = getWidth();
-    //nodePanel.setBounds(0, 0, getWidth(), getHeight() - (getHeight() / 6));
-    //controlsPanel.setBounds(0, getHeight() - (getHeight() / 6), getWidth(), (getHeight() / 6));
     fileComp->setBounds(width - 150, 0, 150, 50);
     mainFreqSlider.setBounds(width - 150, 50, 120, 120);
     addNodeButton.setBounds(width - 150, 170, 50, 50);
@@ -99,6 +97,7 @@ void MainComponent::mouseDown(const MouseEvent& e)
         currentPanel->setVisible(false);
         currentPanel = nullptr;
     }
+    nodePanel.clickedConnection = nullptr;
 
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (nodePanel.clickedNode != nullptr && node != 0 && e.mods.isShiftDown()) {
@@ -117,11 +116,9 @@ void MainComponent::mouseDown(const MouseEvent& e)
         resized();
         return;
     }
-
     for (auto con : nodePanel.allCons) {
         if (con->getPath().contains(e.getMouseDownPosition().toFloat())) {
-            connectionPanel.setUpAttachments(con->getParent()->getComponentID()
-                                           + con->getConnected()->getComponentID());
+            connectionPanel.setUpAttachments(con->getId());
             connectionPanel.setVisible(true);
             currentPanel = &connectionPanel;
             nodePanel.clickedConnection = con;
@@ -180,7 +177,17 @@ void MainComponent::sliderValueChanged(Slider* slider)
     if (clickedCon != nullptr) {
         ValueTree conTree = connectionPanel.paramTree.getChildWithName(clickedCon->getId());
         conTree.setProperty(slider->getName(), slider->getValue(), nullptr);
-        setter.setParam(slider->getName(), clickedCon->getId().toString().getIntValue(), slider->getValue());
+        int connectionNumber = clickedCon->getId().toString().getIntValue();
+        int connectedNumber = clickedCon->getConnected()->getComponentID().getIntValue();
+        int parentNumber = clickedCon->getParent()->getComponentID().getIntValue();
+        if (slider->getName() == "weight") {
+            setter.setWeight(connectedNumber,
+                             parentNumber,
+                             clickedCon->calculateWeight(slider->getValue()));
+        }
+        else {
+            setter.setConParam(slider->getName(), parentNumber, connectedNumber, slider->getValue());
+        }
     }
 }
 
@@ -217,9 +224,9 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     }
     CPGConnection* con = nodePanel.allCons.add(new CPGConnection(from, to));
     con->recalculatePath();
-    setter.setWeight(nodePanel.allCons.getLast()->getConnected()->getComponentID().getIntValue(),
-                    nodePanel.allCons.getLast()->getParent()->getComponentID().getIntValue(),
-                    nodePanel.allCons.getLast()->calculateWeight(1.0)
+    setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
+                     con->getParent()->getComponentID().getIntValue(),
+                     con->calculateWeight(1.0)
     );
     nodePanel.repaint();
     ValueTree conParam(con->getId());
@@ -239,8 +246,8 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
             ValueTree conParams = connectionPanel.paramTree.getChildWithName(con->getId());
             double weightMult = conParams.getPropertyAsValue("weight", nullptr).getValue();
             setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
-                con->getParent()->getComponentID().getIntValue(),
-                con->calculateWeight(weightMult)
+                             con->getParent()->getComponentID().getIntValue(),
+                             con->calculateWeight(weightMult)
             );
         }
     }

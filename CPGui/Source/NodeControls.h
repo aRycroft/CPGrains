@@ -31,11 +31,11 @@ struct NodeControls : public ControlInterface{
     {
         g.fillAll(Colours::darkslategrey);
 
-        waveform.drawChannels(g,                                      // [9]
+        /*waveform.drawChannels(g,                                      
             Rectangle<int>(100, 100),
-            0.0,                                    // start time
-            waveform.getTotalLength(),             // end time
-            1.0f);
+            0.0,                                    
+            waveform.getTotalLength(),             
+            1.0f);*/
 
     }
 
@@ -52,9 +52,6 @@ struct NodeControls : public ControlInterface{
                                  Track(1_fr), Track(3_fr) };
         for (auto* s : sliders) {
             GridItem g1 = GridItem(s);
-            //g1.withAlignSelf(GridItem::AlignSelf::stretch);
-            //g1.minWidth = 130.0f;
-            //g1.minHeight = 150.0f;
             grid.items.add(GridItem());
             grid.items.add(g1);
         }
