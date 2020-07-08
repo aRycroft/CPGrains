@@ -17,6 +17,7 @@ struct ConnectionControls : public ControlInterface {
         paramTree = ValueTree(Identifier("connectionParams"));
         addSliders(listener, LandF);
     }
+
     void setUpAttachments(Identifier componentId) {
         for (auto& slider : sliders) {
             slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()], dontSendNotification);
@@ -35,6 +36,9 @@ struct ConnectionControls : public ControlInterface {
         using Track = Grid::TrackInfo;
         grid.templateRows = { Track(1_fr) };
         grid.templateColumns = { Track(1_fr), Track(3_fr), 
+                                 Track(1_fr), Track(3_fr),
+                                 Track(1_fr), Track(3_fr),
+                                 Track(1_fr), Track(3_fr),
                                  Track(1_fr), Track(3_fr),
                                  Track(1_fr), Track(3_fr) };
         for (auto* s : sliders) {
@@ -67,6 +71,27 @@ struct ConnectionControls : public ControlInterface {
         l->setText("Start Time Mod", dontSendNotification);
         l->attachToComponent(sliders.getLast(), true);
 
+        addAndMakeVisible(sliders.add(new Slider("fWeight")));
+        sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 20.0f, 0.001f, 1.0f));
+        addAndMakeVisible(labels.add(new Label()));
+        l = labels.getLast();
+        l->setText("Feedback Weight", dontSendNotification);
+        l->attachToComponent(sliders.getLast(), true);
+
+        addAndMakeVisible(sliders.add(new Slider("fLengthWeight")));
+        sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 100.0f, 0.001f, 1.0f));
+        addAndMakeVisible(labels.add(new Label()));
+        l = labels.getLast();
+        l->setText("Grain Length Mod", dontSendNotification);
+        l->attachToComponent(sliders.getLast(), true);
+
+        addAndMakeVisible(sliders.add(new Slider("fStartWeight")));
+        sliders.getLast()->setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.001f, 1.0f));
+        addAndMakeVisible(labels.add(new Label()));
+        l = labels.getLast();
+        l->setText("Start Time Mod", dontSendNotification);
+        l->attachToComponent(sliders.getLast(), true);
+
 
         for (auto* slider : sliders) {
             slider->setLookAndFeel(LandF);
@@ -75,6 +100,17 @@ struct ConnectionControls : public ControlInterface {
             slider->setSliderStyle(Slider::Rotary);
             slider->addListener(listener);
         }
+    }
+
+    void addParams(String componentId) {
+        ValueTree conParam(componentId);
+        conParam.setProperty("weight", 1.0f, nullptr);
+        conParam.setProperty("fWeight", 0.0f, nullptr);
+        conParam.setProperty("lengthWeight", 0.0f, nullptr);
+        conParam.setProperty("startWeight", 0.0f, nullptr);
+        conParam.setProperty("lengthWeight", 0.0f, nullptr);
+        conParam.setProperty("startWeight", 0.0f, nullptr);
+        paramTree.addChild(conParam, -1, nullptr);
     }
     ValueTree paramTree;
     OwnedArray<Slider> sliders;

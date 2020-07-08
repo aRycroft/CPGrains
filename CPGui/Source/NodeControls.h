@@ -101,6 +101,16 @@ struct NodeControls : public ControlInterface{
             slider->addListener(listener);
         }
     }
+
+    void addParams(String componentId) {
+        ValueTree nodeParam(componentId);
+        nodeParam.setProperty("grainLength", 200.0f, nullptr);
+        nodeParam.setProperty("startTime", 0.0f, nullptr);
+        nodeParam.setProperty("frequency", 1.0f, nullptr);
+        nodeParam.setProperty("pan", 0.5f, nullptr);
+        nodeParam.setProperty("volume", 0.7f, nullptr);
+        paramTree.addChild(nodeParam, -1, nullptr);
+    }
     
     AudioFormatManager waveformManager;
     AudioThumbnailCache waveformCache;

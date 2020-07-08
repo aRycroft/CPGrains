@@ -60,6 +60,9 @@ MainComponent::MainComponent()
     addAndMakeVisible(&fileLabel);
     currentPanel = nullptr;
     setSize (1000, 600);
+    makeNode(100, 200);
+    makeNode(400, 200);
+    makeConnection(nodePanel.allNodes[0], nodePanel.allNodes[1]);
 }
 
 MainComponent::~MainComponent()
@@ -117,7 +120,7 @@ void MainComponent::mouseDown(const MouseEvent& e)
         return;
     }
     for (auto con : nodePanel.allCons) {
-        if (con->getPath().contains(e.getMouseDownPosition().toFloat())) {
+        if (con->containsPoint(e.getMouseDownPosition().toFloat())) {
             connectionPanel.setUpAttachments(con->getId());
             connectionPanel.setVisible(true);
             currentPanel = &connectionPanel;
@@ -125,6 +128,9 @@ void MainComponent::mouseDown(const MouseEvent& e)
             resized();
             PopupMenu m;
             m.addItem(1, "Delete Connection");
+            Slider s;
+            s.setSize(50, 80);
+            m.addCustomItem(2, s, 50, 60, true);
             const int result = m.show();
             if (result == 1)
             {
@@ -173,6 +179,7 @@ void MainComponent::sliderValueChanged(Slider* slider)
         nodeTree.setProperty(slider->getName(), slider->getValue(), nullptr);
         setter.setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
     }
+
     CPGConnection* clickedCon = nodePanel.clickedConnection;
     if (clickedCon != nullptr) {
         ValueTree conTree = connectionPanel.paramTree.getChildWithName(clickedCon->getId());
@@ -180,7 +187,14 @@ void MainComponent::sliderValueChanged(Slider* slider)
         int connectionNumber = clickedCon->getId().toString().getIntValue();
         int connectedNumber = clickedCon->getConnected()->getComponentID().getIntValue();
         int parentNumber = clickedCon->getParent()->getComponentID().getIntValue();
-        if (slider->getName() == "weight") {
+        /*If slider starts with f it's a feedback control*/
+        if (slider->getName().startsWith("f")) {
+            /*So swap direction*/
+            int temp = connectedNumber;
+            connectedNumber = parentNumber;
+            parentNumber = temp;
+        }
+        if (slider->getName() == "weight" || slider->getName() == "fWeight") {
             setter.setWeight(connectedNumber,
                              parentNumber,
                              clickedCon->calculateWeight(slider->getValue()));
@@ -188,66 +202,49 @@ void MainComponent::sliderValueChanged(Slider* slider)
         else {
             setter.setConParam(slider->getName(), parentNumber, connectedNumber, slider->getValue());
         }
+        clickedCon->recalculatePath(&conTree);
+        nodePanel.repaint();
     }
 }
 
 void MainComponent::makeNode(int x, int y)
 {
-    if (nodePanel.availableNodes.empty()) return;
-    int id = nodePanel.availableNodes.top();
-    nodePanel.availableNodes.pop();
-    nodePanel.addAndMakeVisible(nodePanel.allNodes.add(new CPGNode(id, x, y)));
-    CPGNode* node = nodePanel.allNodes.getLast();
-    node->addComponentListener(this);
-    node->setAlwaysOnTop(true);
-    node->addMouseListener(this, false);
-    setter.setParam("active", node->getComponentID().getIntValue(), 0);
-    nodePanel.resized();
-
-    ValueTree nodeParam(node->getComponentID());
-    nodeParam.setProperty("grainLength", 200.0f, nullptr);
-    nodeParam.setProperty("startTime", 0.0f, nullptr);
-    nodeParam.setProperty("frequency", 1.0f, nullptr);
-    nodeParam.setProperty("pan", 0.5f, nullptr);
-    nodeParam.setProperty("volume", 0.7f, nullptr);
-    controlsPanel.paramTree.addChild(nodeParam, -1, nullptr);
+    int componentID = nodePanel.addNode(this, this, x, y);
+    if (!componentID) return;
+    setter.setParam("active", componentID, 0);
+    controlsPanel.addParams((String)componentID);
 }
 
 void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
 {
-    if (from == to) return;
-    for (auto con : nodePanel.allCons) {
-        if (con->getParent() == from &&
-            con->getConnected() == to) {
-            return;
-        }
-    }
-    CPGConnection* con = nodePanel.allCons.add(new CPGConnection(from, to));
-    con->recalculatePath();
+    CPGConnection* con = nodePanel.addConn(from, to);
+    if (con == nullptr) return;
     setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
                      con->getParent()->getComponentID().getIntValue(),
                      con->calculateWeight(1.0)
     );
+    connectionPanel.addParams(con->getId().toString());
+    con->recalculatePath(&connectionPanel.paramTree.getChildWithName(con->getId()));
     nodePanel.repaint();
-    ValueTree conParam(con->getId());
-    conParam.setProperty("weight", 1.0f, nullptr);
-    conParam.setProperty("lengthWeight", 0.0f, nullptr);
-    conParam.setProperty("startWeight", 0.0f, nullptr);
-    connectionPanel.paramTree.addChild(conParam, -1, nullptr);
 }
 
 void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
     CPGNode* node = dynamic_cast <CPGNode*> (&movedComp);
     if (node == 0) return;
     for (auto con : nodePanel.allCons) {
-        con->recalculatePath();
+        ValueTree conParams = connectionPanel.paramTree.getChildWithName(con->getId());
+        con->recalculatePath(&conParams);
         nodePanel.repaint();
         if (con->getParent() == node || con->getConnected() == node) {
-            ValueTree conParams = connectionPanel.paramTree.getChildWithName(con->getId());
             double weightMult = conParams.getPropertyAsValue("weight", nullptr).getValue();
             setter.setWeight(con->getConnected()->getComponentID().getIntValue(),
                              con->getParent()->getComponentID().getIntValue(),
                              con->calculateWeight(weightMult)
+            );
+            double feedBackWeight = conParams.getPropertyAsValue("fWeight", nullptr).getValue();
+            setter.setWeight(con->getParent()->getComponentID().getIntValue(),
+                con->getConnected()->getComponentID().getIntValue(),
+                con->calculateWeight(feedBackWeight)
             );
         }
     }

@@ -12,4 +12,5 @@
 #include "JuceHeader.h"
 class ControlInterface : public Component{
     virtual void setUpAttachments(Identifier ComponentId) = 0;
+    virtual void addParams(String componentId) = 0;
 };

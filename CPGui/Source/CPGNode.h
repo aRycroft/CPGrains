@@ -33,22 +33,3 @@ private:
 	juce::Colour colour;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPGNode)
 };
-
-/*class ControlNode : public CPGNode {
-public:
-	ControlNode(int nodeNo, int x, int y) {
-		this->setComponentID(String(nodeNo));
-		this->setCentrePosition(x, y);
-		setNodeColour(Colours::orange);
-	}
-	void paint(Graphics& g) {
-		auto area = getLocalBounds().reduced(1);
-		g.setColour(colour);
-		g.drawRoundedRectangle(area.toFloat(), 100.0f, 2.0f);
-
-		g.setColour(Colours::black);
-		g.drawFittedText(getComponentID(), area, Justification::centred, 1);
-	};
-
-};
-*/

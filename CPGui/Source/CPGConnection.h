@@ -18,9 +18,10 @@ public:
     Component* getParent();
     Identifier getId();
     int weight = 0;
-    void recalculatePath();
-    Path getPath();
+    void recalculatePath(ValueTree* conValues);
+    Path* getPath();
     float calculateWeight(double mult);
+    bool containsPoint(Point<float> p);
 private:
     static Point<int> getCentre(Component* comp);
     Component *connectedTo, *parent;

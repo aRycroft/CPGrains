@@ -40,11 +40,11 @@ public:
     void mouseDoubleClick(const MouseEvent& event) override;
     void buttonClicked(Button* button) override;
     void sliderValueChanged(Slider* slider) override;
+    void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
+    void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
 private:
     void makeNode(int x, int y);
     void makeConnection(CPGNode* from, CPGNode* to);
-    void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
-    void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
 
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
