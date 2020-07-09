@@ -16,6 +16,7 @@ CPGNode::CPGNode(int nodeNo, int x, int y)
 	this->setComponentID(String(nodeNo));
 	this->setCentrePosition(x, y);	
 	setNodeColour(Colours::orange);
+	addParams();
 }
 
 void CPGNode::paint(Graphics& g)
@@ -63,4 +64,23 @@ void CPGNode::setNodeColour(juce::Colour newColour)
 	colour = newColour;
 	repaint();
 }
+
+float CPGNode::getPropertyValue(Identifier i) {
+	return params.getPropertyAsValue(i, nullptr).getValue();
+}
+
+void CPGNode::addParams()
+{
+	params.setProperty("grainLength", 200.0, nullptr);
+	params.setProperty("startTime", 0.0, nullptr);
+	params.setProperty("frequency", 1.0, nullptr);
+	params.setProperty("pan", 0.f, nullptr);
+	params.setProperty("volume", 0.7, nullptr);
+}
+
+void CPGNode::setParam(Identifier i, double val)
+{
+	params.setProperty(i, val, nullptr);
+}
+
 

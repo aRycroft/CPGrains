@@ -14,6 +14,7 @@ CPGConnection::CPGConnection(Component* parent, Component* connectedTo)
 {
     this->parent = parent;
     this->connectedTo = connectedTo;
+    addParams();
 }
 
 Component* CPGConnection::getConnected()
@@ -31,13 +32,13 @@ Identifier CPGConnection::getId()
     return parent->getComponentID() + connectedTo->getComponentID();
 }
 
-void CPGConnection::recalculatePath(ValueTree* conValues)
+void CPGConnection::recalculatePath()
 {
     
-    double weight = conValues->getPropertyAsValue("weight", nullptr).getValue();
-    double fWeight = conValues->getPropertyAsValue("fWeight", nullptr).getValue();
-    double lengthWeight = conValues->getPropertyAsValue("lengthWeight", nullptr).getValue();
-    double startWeight = conValues->getPropertyAsValue("startWeight", nullptr).getValue();
+    double weight = params.getPropertyAsValue("weight", nullptr).getValue();
+    double direction = params.getPropertyAsValue("direction", nullptr).getValue();
+    double fWeight = weight * (1 - direction);
+    weight *= direction;
     /*Probably nicer way to do this*/
     juce::Point<int> parentPos = CPGConnection::getCentre(parent);
     juce::Point<int> connectedPos = CPGConnection::getCentre(connectedTo);
@@ -53,11 +54,24 @@ void CPGConnection::recalculatePath(ValueTree* conValues)
     path.addLineSegment(betweenPoints.toFloat(), 5.0f);
     path.addArrow(Line<int>{lineStart, parentEdge}.toFloat(), 5.0f, 40.0f, 500.0f);
     path.addArrow(Line<int>{lineEnd, connectedEdge}.toFloat(), 5.0f, 40.0f, 500.0f);
+    bandPath.clear();
+    double distanceFromLineStart = jmin(20.0 / betweenPoints.getLength(), (double)betweenPoints.getLength() / 2);
+    juce::Point<int> bandPoint = lineStart + (lineEnd - lineStart) * distanceFromLineStart;
+    juce::Line<int> band1 {lineStart, bandPoint};
+    band1.applyTransform(AffineTransform::rotation(MathConstants<float>::halfPi, bandPoint.getX(), bandPoint.getY()));
+    bandPath.addLineSegment(band1.toFloat(), 5.0f);
+    juce::Line<int> band2{ lineStart, bandPoint };
+    band2.applyTransform(AffineTransform::rotation(MathConstants<float>::halfPi, bandPoint.getX(), bandPoint.getY()));
+    bandPath.addLineSegment(band2.toFloat(), 5.0f);
 }
 
 Path* CPGConnection::getPath()
 {
     return &path;
+}
+
+Path* CPGConnection::getParameterPathBands() {
+    return &bandPath;
 }
 
 float CPGConnection::calculateWeight(double mult)
@@ -71,6 +85,11 @@ float CPGConnection::calculateWeight(double mult)
     return std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f);
 }
 
+double CPGConnection::getPropertyValue(Identifier i)
+{
+    return params.getPropertyAsValue(i, nullptr).getValue();
+}
+
 bool CPGConnection::containsPoint(Point<float> point)
 {
     return path.contains(point);
@@ -81,6 +100,21 @@ juce::Point<int> CPGConnection::getCentre(Component* comp)
     int parentX = comp->getPosition().getX() + comp->getWidth() / 2;
     int parentY = comp->getPosition().getY() + comp->getHeight() / 2;
     return juce::Point<int>(parentX, parentY);
+}
+
+void CPGConnection::addParams()
+{
+    params.setProperty("weight", 1.0, nullptr);
+    params.setProperty("direction", 0.0, nullptr);
+    params.setProperty("lengthWeight", 1.0, nullptr);
+    params.setProperty("lengthDirection", 0.0, nullptr);
+    params.setProperty("posWeight", 1.0, nullptr);
+    params.setProperty("posDirection", 0.0, nullptr);
+}
+
+void CPGConnection::setParam(Identifier i, double val)
+{
+    params.setProperty(i, val, nullptr);
 }
 
 

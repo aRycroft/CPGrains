@@ -22,14 +22,19 @@ public:
 	void mouseDrag(const MouseEvent& e) override;
 	void mouseUp(const MouseEvent& event);
 	void setNodeColour(juce::Colour newColour);
+	float getPropertyValue(Identifier i);
+	void addParams();
+	void setParam(Identifier i, double val);
 	void toggleActive() {
 		isActive = !isActive;
 	}
 	bool nodeIsActive() { return isActive; };
 private:
+	//void addParams();
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
 	bool isActive{ true };
 	juce::Colour colour;
+	ValueTree params{ "Params" };
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPGNode)
 };

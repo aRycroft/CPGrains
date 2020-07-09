@@ -18,12 +18,17 @@ public:
     Component* getParent();
     Identifier getId();
     int weight = 0;
-    void recalculatePath(ValueTree* conValues);
+    void recalculatePath();
     Path* getPath();
+    Path* getParameterPathBands();
     float calculateWeight(double mult);
+    double getPropertyValue(Identifier i);
     bool containsPoint(Point<float> p);
+    void setParam(Identifier i, double val);
 private:
     static Point<int> getCentre(Component* comp);
+    void addParams();
     Component *connectedTo, *parent;
-    Path path;
+    Path path, bandPath;
+    ValueTree params{ "Params" };
 };

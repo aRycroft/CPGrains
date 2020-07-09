@@ -45,6 +45,9 @@ public:
 private:
     void makeNode(int x, int y);
     void makeConnection(CPGNode* from, CPGNode* to);
+    void createConnectionMenu();
+    void changeMenuSliders(Identifier i, Identifier direction);
+    void setUpMenu();
 
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
@@ -58,5 +61,9 @@ private:
     Label addButtonLabel, mFreqLabel, fileLabel, DSPLabel;
     OSCParamSetter setter{ 8000 };
     bool DSPOn{ false };
+    /*Popup menu stuff, could put this is another class*/
+    PopupMenu m;
+    Slider weightSlider, directionSlider;
+    ToggleButton weightButton, lengthButton, positionButton;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

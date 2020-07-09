@@ -17,7 +17,10 @@ struct nodeContainer : public Component {
     {
         g.fillAll(Colours::cadetblue);
         for (auto& con : allCons) {
+            g.setColour(Colours::black);
             g.fillPath(*con->getPath());
+            g.setColour(Colours::antiquewhite);
+            g.fillPath(*con->getParameterPathBands());
         }
     }
 

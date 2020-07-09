@@ -7,9 +7,9 @@
 
   ==============================================================================
 */
-
 #pragma once
 #include "ControlInterface.h"
+#define NUMSLIDERS 5
 struct NodeControls : public ControlInterface{
     NodeControls(Slider::Listener* listener, LookAndFeel_V4* LandF)
         :
@@ -17,15 +17,21 @@ struct NodeControls : public ControlInterface{
         waveform(512, waveformManager, waveformCache)
     {
         waveformManager.registerBasicFormats();
-        paramTree = ValueTree(Identifier("nodeParams"));
         addSliders(listener, LandF);
     }
 
-    void setUpAttachments(Identifier componentId) {
+    void setValues(CPGNode* node) {
+        for (int i{ 0 }; i < NUMSLIDERS; i++) {
+            sliderArr[i]->setValue(node->getPropertyValue(sliderArr[i]->getName()), dontSendNotification);
+        }
+    }
+
+    /*void setUpAttachments(Identifier componentId) {
+        
         for (auto& slider : sliders) {
             slider->setValue(paramTree.getChildWithName(componentId)[slider->getName()], dontSendNotification);
         }
-    }
+    }*/
 
     void paint(Graphics& g) override
     {
@@ -50,15 +56,33 @@ struct NodeControls : public ControlInterface{
                                  Track(1_fr), Track(3_fr),
                                  Track(1_fr), Track(3_fr),
                                  Track(1_fr), Track(3_fr) };
-        for (auto* s : sliders) {
-            GridItem g1 = GridItem(s);
+        for (int i{ 0 }; i < NUMSLIDERS; i++) {
+            GridItem g1 = GridItem(*sliderArr[i]);
             grid.items.add(GridItem());
             grid.items.add(g1);
         }
+        /*for (auto s : sliderArr->get()) {
+            GridItem g1 = GridItem(s);
+            grid.items.add(GridItem());
+            grid.items.add(g1);
+        }*/
         grid.performLayout(getLocalBounds());
     }
     void addSliders(Slider::Listener* listener, LookAndFeel_V4* LandF) {
-        addAndMakeVisible(sliders.add(new Slider("grainLength")));
+        if (NUMSLIDERS < 4) jassert("Not Enough room in slider array");
+        addSlider("grainLength", "Grain Size", 0, 1.0f, 2000.0f, 0.25f);
+        addSlider("startTime", "Position", 1, 0.0f, 1000.0f, 1.0f);
+        addSlider("frequency", "Freq", 2, 0.03125f, 16.0f, 1.0f);
+        addSlider("pan", "Pan", 3, 0.0f, 1.0f, 1.0f);
+        addSlider("volume", "Volume", 4, 0.0f, 1.0f, 1.0f);
+        for (int i{ 0 }; i < NUMSLIDERS; i++) {
+            sliderArr[i]->setLookAndFeel(LandF);
+            sliderArr[i]->setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxAbove, false, 40, 40);
+            sliderArr[i]->setNumDecimalPlacesToDisplay(1);
+            sliderArr[i]->setSliderStyle(Slider::Rotary);
+            sliderArr[i]->addListener(listener);
+        }
+        /*addAndMakeVisible(sliders.add(new Slider("grainLength")));
         sliders.getLast()->setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.1f, 0.25f));
         addAndMakeVisible(labels.add(new Label()));
         Label* l = labels.getLast();
@@ -99,10 +123,20 @@ struct NodeControls : public ControlInterface{
             slider->setNumDecimalPlacesToDisplay(1);
             slider->setSliderStyle(Slider::Rotary);
             slider->addListener(listener);
-        }
+        }*/
     }
 
-    void addParams(String componentId) {
+    void addSlider(String name, String labelText, int i, float rangeStart, float rangeEnd, float skew) {
+        sliderArr[i] = std::unique_ptr<Slider>{ new Slider{name} };
+        sliderArr[i]->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.001f, skew));
+        addAndMakeVisible(*sliderArr[i]);
+        labelArr[i] = std::unique_ptr<Label>{ new Label{name} };
+        labelArr[i]->setText(labelText, dontSendNotification);
+        labelArr[i]->attachToComponent(sliderArr[i].get(), true);
+        addAndMakeVisible(*labelArr[i]);
+    }
+
+    /*void addParams(String componentId) {
         ValueTree nodeParam(componentId);
         nodeParam.setProperty("grainLength", 200.0f, nullptr);
         nodeParam.setProperty("startTime", 0.0f, nullptr);
@@ -110,12 +144,13 @@ struct NodeControls : public ControlInterface{
         nodeParam.setProperty("pan", 0.5f, nullptr);
         nodeParam.setProperty("volume", 0.7f, nullptr);
         paramTree.addChild(nodeParam, -1, nullptr);
-    }
+    }*/
     
     AudioFormatManager waveformManager;
     AudioThumbnailCache waveformCache;
     AudioThumbnail waveform;
-    ValueTree paramTree;
+    std::unique_ptr<Slider> sliderArr[NUMSLIDERS];
+    std::unique_ptr<Label> labelArr[NUMSLIDERS];
     OwnedArray<Slider> sliders;
     OwnedArray<Label> labels;
     bool displayingControls{ false };
