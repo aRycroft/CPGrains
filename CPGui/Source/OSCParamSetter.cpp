@@ -27,20 +27,20 @@ OSCParamSetter::OSCParamSetter(int portNumber)
 void OSCParamSetter::setWeight(int currentNode, int targetNode, float weight)
 {
     String msg;
-    msg << "/weight/conn/" << targetNode << "/" << currentNode;
+    msg << "/weight/conn/" << targetNode + 1 << "/" << currentNode + 1;
     sender.send(msg, weight);
 }
 
 void OSCParamSetter::setParam(String toSet, int nodeNo, float value)
 {
     String msg;
-    msg << "/control/" << toSet << "/" << nodeNo;
+    msg << "/control/" << toSet << "/" << nodeNo + 1;
     sender.send(msg, value);
 }
 
 void OSCParamSetter::setConParam(String toSet, int from, int to, float value) {
     String msg;
-    msg << "/Concontrol/" << to << "/" << toSet << "/" << from;
+    msg << "/Concontrol/" << to + 1 << "/" << toSet << "/" << from + 1;
     sender.send(msg, value);
 }
 

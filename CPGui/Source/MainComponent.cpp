@@ -10,12 +10,13 @@
 
 //==============================================================================
 MainComponent::MainComponent()
-    :nodePanel(),
+    :
     controlsPanel(this, &LandF),
-    connectionPanel(this, &LandF),
     setter{ new OSCParamSetter(8000) },
     nodeChangeListener{ new NodeChangeListener{ paramTree, setter.get()} },
-    connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} }
+    connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
+    conMenu(conParams, &clickedCon),
+    nodeMenu(nodeParams, &clickedNode)
 {
     paramTree.addChild(nodeParams, 0, nullptr);
     paramTree.addChild(conParams, 1, nullptr);
@@ -32,13 +33,11 @@ MainComponent::MainComponent()
     nodeParams.addListener(nodeChangeListener.get());
     conParams.addListener(connectionChangeListener.get());
 
-    setUpConnectionMenu();
     for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
         availableNodes.push(i);
     }
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(controlsPanel);
-    addAndMakeVisible(connectionPanel);
     nodePanel.setInterceptsMouseClicks(false, true);
 
     /*Extra main controls, could put these elsewhere?*/
@@ -155,7 +154,7 @@ void MainComponent::mouseDown(const MouseEvent& e)
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (cons[i] != nullptr && cons[i]->containsPoint(e.getMouseDownPosition().toFloat())) {
             clickedCon = i;
-            showConnectionMenu(i);
+            conMenu.showMenu();
             return;
         }
     }
@@ -164,14 +163,18 @@ void MainComponent::mouseDown(const MouseEvent& e)
 void MainComponent::mouseDoubleClick(const MouseEvent& e) {
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (node == 0) return;
-    node->toggleActive();
+    clickedNode = node->getNodeNumber();
+    nodeMenu.showMenu();
+
+
+    /*node->toggleActive();
     node->repaint();
     if (node->nodeIsActive()) {
         setter->setParam("active", node->getNodeNumber(), 0);
     }
     else {
         setter->setParam("active", node->getNodeNumber(), 1);
-    }
+    }*/
 }
 
 void MainComponent::buttonClicked(Button* button)
@@ -238,76 +241,6 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     repaint(); 
 }
 
-void MainComponent::showConnectionMenu(int connectionIndex)
-{
-    /*All this could do with a refactor*/
-    /*Radio buttons are not working nicely*/
-    changeMenuSliders("weight", "weightDir");
-    weightButton.onClick();
-    weightSlider.setValue(conParams.getChild(connectionIndex).getProperty("weight"));
-    directionSlider.setValue(conParams.getChild(connectionIndex).getProperty("weightDir"));
-
-    weightSlider.onValueChange = [this, connectionIndex] {
-        conParams.getChild(connectionIndex).setProperty("weight", weightSlider.getValue(), nullptr);
-    };
-    directionSlider.onValueChange = [this, connectionIndex] {
-        conParams.getChild(connectionIndex).setProperty("weightDir", directionSlider.getValue(), nullptr);
-    };    
-
-    const int result = m.show();
-    if (result == 1)
-    {
-    }
-}
-
-void MainComponent::changeMenuSliders(Identifier weight, Identifier direction)
-{
-    weightSlider.setValue(conParams.getChild(clickedCon).getProperty(weight), dontSendNotification);
-    directionSlider.setValue(conParams.getChild(clickedCon).getProperty(direction), dontSendNotification);
-    weightSlider.onValueChange = [this, weight] {
-        conParams.getChild(clickedCon).setProperty(weight, weightSlider.getValue(), nullptr);
-    };
-    directionSlider.onValueChange = [this, direction] {
-        conParams.getChild(clickedCon).setProperty(direction, directionSlider.getValue(), nullptr);
-    };
-}
-
-void MainComponent::setUpConnectionMenu()
-{
-    /*This is pretty bad*/
-    m.addItem(1, "Delete Connection");
-    //weightSlider.setName("weight");
-    weightSlider.setNormalisableRange(NormalisableRange<double>(0.0, 10.0, 0.01, 1.0));
-    m.addCustomItem(-1, weightSlider, 50, 60, false);
-    directionSlider.setName("direction");
-    directionSlider.setNormalisableRange(NormalisableRange<double>(0.0, 1.0, 0.01, 1.0));
-    m.addCustomItem(-1, directionSlider, 50, 60, false);
-    weightButton.setRadioGroupId(1);
-    lengthButton.setRadioGroupId(1);
-    positionButton.setRadioGroupId(1);
-    weightButton.onClick = [this] {
-        lengthButton.setToggleState(false, dontSendNotification);
-        positionButton.setToggleState(false, dontSendNotification);
-        weightButton.setToggleState(true, dontSendNotification);
-        changeMenuSliders("weight", "weightDir");
-    };
-    lengthButton.onClick = [this] {
-        weightButton.setToggleState(false, dontSendNotification);
-        positionButton.setToggleState(false, dontSendNotification);
-        lengthButton.setToggleState(true, dontSendNotification);
-        changeMenuSliders("lengthMod", "lengthModDir");
-    };
-    positionButton.onClick = [this] {
-        weightButton.setToggleState(false, dontSendNotification);
-        lengthButton.setToggleState(false, dontSendNotification);
-        positionButton.setToggleState(true, dontSendNotification);
-        changeMenuSliders("startMod", "startModDir");
-    };
-    weightButton.setToggleState(true, dontSendNotification);
-    m.addCustomItem(-1, weightButton, 50, 50, false);
-    m.addCustomItem(-1, lengthButton, 50, 50, false);
-    m.addCustomItem(-1, positionButton, 50, 50, false);
-}
 
 ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {

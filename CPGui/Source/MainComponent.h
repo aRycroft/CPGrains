@@ -12,12 +12,12 @@
 #include "CPGLookAndFeel.h"
 #include "CPGNode.h"
 #include "OSCParamSetter.h"
-#include "NodePanel.h"
 #include "NodeControls.h"
-#include "ConnectionControls.h"
 #include "NodeChangeListener.h"
 #include "ConnectionChangeListener.h"
 #include <stack>
+#include "ConnectionMenu.h"
+#include "NodeMenu.h"
 #define NUM_NODES 4
 #define NUM_CONNECTIONS (NUM_NODES * (NUM_NODES - 1)) / 2
 #define NODESIZE 70
@@ -52,18 +52,17 @@ private:
     void makeNode(int x, int y);
     void deleteNode(int nodeId);
     void makeConnection(CPGNode* from, CPGNode* to);
-    void showConnectionMenu(int connectionIndex);
+    /*void showConnectionMenu(int connectionIndex);
     void changeMenuSliders(Identifier i, Identifier direction);
     void setUpConnectionMenu();
-    void setUpMenu() {};
+    */void setUpMenu() {};
     ValueTree makeNodeValueTree(int nodeId);
     ValueTree makeConnectionValueTree(int connectionIndex);
     int getConnectionIndex(int from, int to);
 
     CPGLookAndFeel LandF;
-    Component nodePanel{};
+    Component nodePanel;
     NodeControls controlsPanel;
-    ConnectionControls connectionPanel;
     ControlInterface* currentPanel;
 
     TextButton addNodeButton;
@@ -74,10 +73,6 @@ private:
     bool DSPOn{ false };
 
     /*Popup menu stuff, could put this is another class*/
-    PopupMenu m;
-    Slider weightSlider, directionSlider;
-    ToggleButton weightButton, lengthButton, positionButton;
-
     std::unique_ptr<OSCParamSetter> setter;
     std::stack<int> availableNodes;
     ValueTree paramTree{ "params" };
@@ -89,6 +84,9 @@ private:
     int clickedCon{ -1 };
     std::unique_ptr<NodeChangeListener> nodeChangeListener;
     std::unique_ptr<ConnectionChangeListener> connectionChangeListener;
+    ConnectionMenu conMenu;
+    NodeMenu nodeMenu;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
     
