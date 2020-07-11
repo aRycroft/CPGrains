@@ -15,7 +15,12 @@
 #include "NodePanel.h"
 #include "NodeControls.h"
 #include "ConnectionControls.h"
+#include "NodeChangeListener.h"
+#include "ConnectionChangeListener.h"
 #include <stack>
+#define NUM_NODES 4
+#define NUM_CONNECTIONS (NUM_NODES * (NUM_NODES - 1)) / 2
+#define NODESIZE 70
 
 //==============================================================================
 /*
@@ -26,7 +31,8 @@ class MainComponent   : public Component,
                         public ComponentListener,
                         public Button::Listener,
                         public Slider::Listener,
-                        public FilenameComponentListener
+                        public FilenameComponentListener,
+                        public ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -42,12 +48,20 @@ public:
     void sliderValueChanged(Slider* slider) override;
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
     void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
+    void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property) override;
 private:
     void makeNode(int x, int y);
+    void deleteNode(int nodeId);
     void makeConnection(CPGNode* from, CPGNode* to);
-    void createConnectionMenu();
+    void showConnectionMenu(int connectionIndex);
     void changeMenuSliders(Identifier i, Identifier direction);
-    void setUpMenu();
+    void setUpConnectionMenu();
+    void setUpMenu() {};
+    ValueTree makeNodeValueTree(int nodeId);
+    ValueTree makeConnectionValueTree(int connectionIndex);
+    int getConnectionIndex(int from, int to);
+    //void initParamTree();
+    //void initNodeParams(ValueTree* nodeParams);
 
     CPGLookAndFeel LandF;
     nodeContainer nodePanel;
@@ -59,11 +73,25 @@ private:
     Slider mainFreqSlider;
     std::unique_ptr<FilenameComponent> fileComp;
     Label addButtonLabel, mFreqLabel, fileLabel, DSPLabel;
-    OSCParamSetter setter{ 8000 };
     bool DSPOn{ false };
     /*Popup menu stuff, could put this is another class*/
     PopupMenu m;
     Slider weightSlider, directionSlider;
     ToggleButton weightButton, lengthButton, positionButton;
+    std::unique_ptr<OSCParamSetter> setter;
+    std::stack<int> availableNodes;
+    ValueTree paramTree{ "params" };
+    ValueTree nodeParams{ "nodeParams" };
+    ValueTree conParams{ "conParams" };
+    Array<ValueTree> childTrees;
+    //std::unique_ptr<CPGNode> clickedNode;
+    std::unique_ptr<CPGNode> nodes[NUM_NODES];
+    std::unique_ptr<CPGConnection> cons[NUM_CONNECTIONS];
+    int clickedNode{ -1 };
+    int clickedCon{ -1 };
+    //OwnedArray<CPGNode> nodes{};
+    std::unique_ptr<NodeChangeListener> nodeChangeListener;
+    std::unique_ptr<ConnectionChangeListener> connectionChangeListener;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
+    

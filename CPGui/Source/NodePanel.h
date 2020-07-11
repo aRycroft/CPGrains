@@ -8,20 +8,20 @@ struct nodeContainer : public Component {
     nodeContainer(int numNodes) {
         allNodes.ensureStorageAllocated(NUM_NODES);
         allCons.ensureStorageAllocated(NUM_NODES * NUM_NODES);
-        for (int i = NUM_NODES; i > 0; i--) {
+        for (int i{ NUM_NODES }; i > 0; i--) {
             availableNodes.push(i);
         }
     }
 
     void paint(Graphics& g) override
     {
-        g.fillAll(Colours::cadetblue);
+        /*g.fillAll(Colours::cadetblue);
         for (auto& con : allCons) {
             g.setColour(Colours::black);
             g.fillPath(*con->getPath());
             g.setColour(Colours::antiquewhite);
             g.fillPath(*con->getParameterPathBands());
-        }
+        }*/
     }
 
     void resized() override

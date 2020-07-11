@@ -10,7 +10,7 @@
 
 #pragma once
 #include "JuceHeader.h"
-class CPGConnection
+class CPGConnection 
 {
 public:
     CPGConnection(Component* parent, Component* connectedTo);

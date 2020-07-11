@@ -2,6 +2,12 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
+    <FILE id="EPD65q" name="MainMouseListener.h" compile="0" resource="0"
+          file="Source/MainMouseListener.h"/>
+    <FILE id="fG8XTG" name="ConnectionChangeListener.h" compile="0" resource="0"
+          file="Source/ConnectionChangeListener.h"/>
+    <FILE id="uNSAs4" name="NodeChangeListener.h" compile="0" resource="0"
+          file="Source/NodeChangeListener.h"/>
     <FILE id="W9NlFQ" name="ConnectionControls.h" compile="0" resource="0"
           file="Source/ConnectionControls.h"/>
     <FILE id="M0TpRT" name="ControlInterface.h" compile="0" resource="0"
