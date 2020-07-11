@@ -18,13 +18,15 @@ public:
     {
         setter = paramSetter;
     }
-    void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property) override {
-        if (treeWhosePropertyHasChanged.getParent() == tree.getChild(0)) {
-            int nodeId = treeWhosePropertyHasChanged.getType().toString().getLastCharacter() - '0';
-            setter->setParam(property.toString(), nodeId, treeWhosePropertyHasChanged.getProperty(property));
+    void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
+        if (property == grainLength || property == startTime || property == frequency) {
+            setter->setParam(property.toString(), vTree.getType().toString().getIntValue(), vTree.getProperty(property));
         }
     };
 private:
     ValueTree tree;
     ParamSetter *setter;
+    Identifier grainLength{ "grainLength" };
+    Identifier startTime{ "startTime" };
+    Identifier frequency{ "frequency" };
 };

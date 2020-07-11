@@ -19,15 +19,18 @@ MainComponent::MainComponent()
 {
     paramTree.addChild(nodeParams, 0, nullptr);
     paramTree.addChild(conParams, 1, nullptr);
-    nodeParams.addListener(nodeChangeListener.get());
-    conParams.addListener(connectionChangeListener.get());
+
     for (int i{ 0 }; i < NUM_NODES; i++) {
         nodeParams.addChild(makeNodeValueTree(i), i, nullptr);
+
     }
     DBG(NUM_CONNECTIONS);
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         conParams.addChild(makeConnectionValueTree(i), i, nullptr);
     }
+
+    nodeParams.addListener(nodeChangeListener.get());
+    conParams.addListener(connectionChangeListener.get());
 
     setUpConnectionMenu();
     for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
@@ -198,7 +201,10 @@ void MainComponent::buttonClicked(Button* button)
 
 void MainComponent::sliderValueChanged(Slider* slider)
 {
-    CPGNode* clickedNode = nodePanel.clickedNode;
+    nodeParams.getChild(clickedNode).setProperty(slider->getName(), slider->getValue(), nullptr);
+
+
+    /*CPGNode* clickedNode = nodePanel.clickedNode;
     if (clickedNode != nullptr) {
         clickedNode->setParam(slider->getName(), slider->getValue());
         setter->setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
@@ -211,10 +217,9 @@ void MainComponent::sliderValueChanged(Slider* slider)
         int parentNumber = clickedCon->getParent()->getComponentID().getIntValue();
         double direction = clickedCon->getPropertyValue("direction");
         double weight = clickedCon->getPropertyValue("weight");
-        /*No Feedback*/
         clickedCon->recalculatePath();
         nodePanel.repaint();
-        if (direction == 0) {
+        /*if (direction == 0) {
             setter->setWeight(connectedNumber, parentNumber, clickedCon->calculateWeight(weight));
         }
         else if (direction == 1) {
@@ -223,7 +228,7 @@ void MainComponent::sliderValueChanged(Slider* slider)
         else {
             setter->setWeight(connectedNumber, parentNumber, clickedCon->calculateWeight(weight * direction));
             setter->setWeight(parentNumber, connectedNumber, clickedCon->calculateWeight(weight * (1 - direction)));
-        }
+        }*/
         /*
         ValueTree conTree = connectionPanel.paramTree.getChildWithName(clickedCon->getId());
         conTree.setProperty(slider->getName(), slider->getValue(), nullptr);
@@ -244,8 +249,8 @@ void MainComponent::sliderValueChanged(Slider* slider)
             setter.setConParam(slider->getName(), parentNumber, connectedNumber, slider->getValue());
         }
         clickedCon->recalculatePath(&conTree);
-        nodePanel.repaint();*/
-    }
+        nodePanel.repaint();
+    }*/
 }
 
 void MainComponent::makeNode(int x, int y)
@@ -367,7 +372,7 @@ void MainComponent::setUpConnectionMenu()
         weightButton.setToggleState(false, dontSendNotification);
         lengthButton.setToggleState(false, dontSendNotification);
         positionButton.setToggleState(true, dontSendNotification);
-        changeMenuSliders("sizeMod", "sizeModDir");
+        changeMenuSliders("startMod", "startModDir");
     };
     weightButton.setToggleState(true, dontSendNotification);
     m.addCustomItem(-1, weightButton, 50, 50, false);
@@ -379,8 +384,8 @@ ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {
     return ValueTree{ Identifier{String{nodeId} } }
         .setProperty("active", false, nullptr)
-        .setProperty("xStart", 0.0, nullptr)
-        .setProperty("yStart", 0.0, nullptr)
+        .setProperty("x", 0.0, nullptr)
+        .setProperty("y", 0.0, nullptr)
         .setProperty("grainLength", 200.0, nullptr)
         .setProperty("startTime", 0.0, nullptr)
         .setProperty("frequency", 1.0, nullptr)
@@ -398,8 +403,8 @@ ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
         .setProperty("weightDir", 0.5, nullptr)
         .setProperty("lengthMod", 0.0, nullptr)
         .setProperty("lengthModDir", 0.0, nullptr)
-        .setProperty("sizeMod", 0.0, nullptr)
-        .setProperty("sizeModDir", 0.0, nullptr);
+        .setProperty("startMod", 0.0, nullptr)
+        .setProperty("startModDir", 0.0, nullptr);
 }
 
 int MainComponent::getConnectionIndex(int from, int to)
@@ -419,6 +424,8 @@ int MainComponent::getConnectionIndex(int from, int to)
 void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
     CPGNode* node = dynamic_cast <CPGNode*> (&movedComp);
     if (node == 0) return;
+    nodeParams.getChild(node->getNodeNumber()).setProperty("x", node->getX(), nullptr);
+    nodeParams.getChild(node->getNodeNumber()).setProperty("y", node->getY(), nullptr);
     for (int i{ 0 }; i < NUM_NODES; i++) {
         int nodeNumber = node->getNodeNumber();
         int connectionIndex = getConnectionIndex(nodeNumber, i);
@@ -426,8 +433,8 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
             cons[connectionIndex]->recalculatePath();
             double weight = conParams.getChild(connectionIndex).getPropertyAsValue("weight", nullptr).getValue();
             double dir = conParams.getChild(connectionIndex).getPropertyAsValue("weightDir", nullptr).getValue();
-            setter->setWeight(nodeNumber, i, cons[connectionIndex]->calculateWeight(weight * dir));
-            setter->setWeight(i, nodeNumber, cons[connectionIndex]->calculateWeight(weight * (1 - dir)));
+            connectionChangeListener->sendWeight(nodeNumber, i, weight * dir);
+            connectionChangeListener->sendWeight(i, nodeNumber, weight * (1 - dir));
         }
     }
     repaint();
