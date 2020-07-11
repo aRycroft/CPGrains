@@ -10,7 +10,7 @@
 
 //==============================================================================
 MainComponent::MainComponent()
-    :nodePanel(NUM_NODES),
+    :nodePanel(),
     controlsPanel(this, &LandF),
     connectionPanel(this, &LandF),
     setter{ new OSCParamSetter(8000) },
@@ -146,7 +146,6 @@ void MainComponent::mouseDown(const MouseEvent& e)
     if(node != 0) {
         node->setNodeColour(Colours::white);
         clickedNode = node->getNodeNumber();
-        nodePanel.clickedNode = node;
         controlsPanel.setValues(node);
         currentPanel = &controlsPanel;
         currentPanel->setVisible(true);
@@ -160,17 +159,6 @@ void MainComponent::mouseDown(const MouseEvent& e)
             return;
         }
     }
-
-    /*for (auto con : nodePanel.allCons) {
-        if (con->containsPoint(e.getMouseDownPosition().toFloat())) {
-            connectionPanel.setUpAttachments(con->getId());
-            connectionPanel.setVisible(true);
-            currentPanel = &connectionPanel;
-            nodePanel.clickedConnection = con;
-            resized();
-            return;
-        }
-    }*/
 }
 
 void MainComponent::mouseDoubleClick(const MouseEvent& e) {
@@ -184,8 +172,6 @@ void MainComponent::mouseDoubleClick(const MouseEvent& e) {
     else {
         setter->setParam("active", node->getNodeNumber(), 1);
     }
-    //deleteNode(node->getNodeNumber());
-    //clickedNode = -1;
 }
 
 void MainComponent::buttonClicked(Button* button)
@@ -202,55 +188,6 @@ void MainComponent::buttonClicked(Button* button)
 void MainComponent::sliderValueChanged(Slider* slider)
 {
     nodeParams.getChild(clickedNode).setProperty(slider->getName(), slider->getValue(), nullptr);
-
-
-    /*CPGNode* clickedNode = nodePanel.clickedNode;
-    if (clickedNode != nullptr) {
-        clickedNode->setParam(slider->getName(), slider->getValue());
-        setter->setParam(slider->getName(), clickedNode->getComponentID().getIntValue(), slider->getValue());
-    }
-
-    CPGConnection* clickedCon = nodePanel.clickedConnection;
-    if (clickedCon != nullptr) {
-        clickedCon->setParam(slider->getName(), slider->getValue());
-        int connectedNumber = clickedCon->getConnected()->getComponentID().getIntValue();
-        int parentNumber = clickedCon->getParent()->getComponentID().getIntValue();
-        double direction = clickedCon->getPropertyValue("direction");
-        double weight = clickedCon->getPropertyValue("weight");
-        clickedCon->recalculatePath();
-        nodePanel.repaint();
-        /*if (direction == 0) {
-            setter->setWeight(connectedNumber, parentNumber, clickedCon->calculateWeight(weight));
-        }
-        else if (direction == 1) {
-            setter->setWeight(parentNumber, connectedNumber, clickedCon->calculateWeight(weight));
-        }
-        else {
-            setter->setWeight(connectedNumber, parentNumber, clickedCon->calculateWeight(weight * direction));
-            setter->setWeight(parentNumber, connectedNumber, clickedCon->calculateWeight(weight * (1 - direction)));
-        }*/
-        /*
-        ValueTree conTree = connectionPanel.paramTree.getChildWithName(clickedCon->getId());
-        conTree.setProperty(slider->getName(), slider->getValue(), nullptr);
-        int connectionNumber = clickedCon->getId().toString().getIntValue();
-        int connectedNumber = clickedCon->getConnected()->getComponentID().getIntValue();
-        int parentNumber = clickedCon->getParent()->getComponentID().getIntValue();
-        if (slider->getName().startsWith("f")) {
-            int temp = connectedNumber;
-            connectedNumber = parentNumber;
-            parentNumber = temp;
-        }
-        if (slider->getName() == "weight" || slider->getName() == "fWeight") {
-            setter.setWeight(connectedNumber,
-                             parentNumber,
-                             clickedCon->calculateWeight(slider->getValue()));
-        }
-        else {
-            setter.setConParam(slider->getName(), parentNumber, connectedNumber, slider->getValue());
-        }
-        clickedCon->recalculatePath(&conTree);
-        nodePanel.repaint();
-    }*/
 }
 
 void MainComponent::makeNode(int x, int y)
@@ -261,7 +198,7 @@ void MainComponent::makeNode(int x, int y)
     nodes[nodeId].reset(new CPGNode(nodeId, x, y));
     nodes[nodeId]->addComponentListener(this);
     nodes[nodeId]->addMouseListener(this ,false);
-    addAndMakeVisible(nodes[nodeId].get());
+    nodePanel.addAndMakeVisible(nodes[nodeId].get());
     setter->setParam("active", nodeId, 0);
     nodeParams.getChild(nodeId).setProperty("active", true, nullptr);
     resized();
@@ -293,7 +230,6 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
             from->getNodeNumber(),
             cons[connectionIndex]->calculateWeight(1.0)
         );
-        //conParams.addChild(makeConnectionValueTree(connectionIndex), connectionIndex, nullptr);
         conParams.getChild(connectionIndex).setProperty("active", true, nullptr);
         conParams.getChild(connectionIndex).setProperty("from", from->getNodeNumber(), nullptr);
         conParams.getChild(connectionIndex).setProperty("to", to->getNodeNumber(), nullptr);
@@ -321,13 +257,6 @@ void MainComponent::showConnectionMenu(int connectionIndex)
     const int result = m.show();
     if (result == 1)
     {
-        setter->setWeight(nodePanel.allCons.getLast()->getConnected()->getComponentID().getIntValue(),
-            nodePanel.allCons.getLast()->getParent()->getComponentID().getIntValue(),
-            0.0f
-        );
-        nodePanel.allCons.removeObject(nodePanel.clickedConnection);
-        nodePanel.clickedConnection = nullptr;
-        nodePanel.repaint();
     }
 }
 
@@ -446,28 +375,3 @@ void MainComponent::filenameComponentChanged(FilenameComponent* fileComponentTha
         setter->setFile(fileComp->getCurrentFile().getFullPathName());
     }
 }
-
-void MainComponent::valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property)
-{
-}
-
-
-/*
-void MainComponent::initParamTree()
-{
-    for (int i{ 0 }; i < NUM_NODES; i++) {
-        ValueTree node{ "node" + i };
-        initNodeParams(&node);
-        paramTree.addChild(node, i, nullptr);
-
-    }
-}
-
-void MainComponent::initNodeParams(ValueTree* nodeParams)
-{
-    nodeParams->setProperty("grainLength", 200.0, nullptr);
-    nodeParams->setProperty("startTime", 0.0, nullptr);
-    nodeParams->setProperty("frequency", 1.0, nullptr);
-    nodeParams->setProperty("pan", 0.f, nullptr);
-    nodeParams->setProperty("volume", 0.7, nullptr);
-}*/
