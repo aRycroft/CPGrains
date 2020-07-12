@@ -42,7 +42,7 @@ private:
         this->addCustomItem(-1, size, 200, 60, false);
         pos.setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.01f, 1.0f));
         this->addCustomItem(-1, pos, 200, 60, false);
-        frequency.setNormalisableRange(NormalisableRange<double>(0.03125f, 16.0f, 0.01f, 1.0f));
+        frequency.setNormalisableRange(NormalisableRange<double>(0.03125f, 200.0f, 0.01f, 1.0f));
         this->addCustomItem(-1, frequency, 200, 60, false);
     }
 

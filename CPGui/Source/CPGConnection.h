@@ -13,7 +13,7 @@
 class CPGConnection 
 {
 public:
-    CPGConnection(Component* parent, Component* connectedTo);
+    CPGConnection(Component* parent, Component* connectedTo, ValueTree conParams);
     Component* getConnected();
     Component* getParent();
     Identifier getId();
@@ -30,5 +30,5 @@ private:
     void addParams();
     Component *connectedTo, *parent;
     Path path, bandPath;
-    ValueTree params{ "Params" };
+    ValueTree params;
 };

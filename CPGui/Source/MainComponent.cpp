@@ -11,11 +11,11 @@
 //==============================================================================
 MainComponent::MainComponent()
     :
-    controlsPanel(this, &LandF),
+    samplePanel(this),
     setter{ new OSCParamSetter(8000) },
     nodeChangeListener{ new NodeChangeListener{ paramTree, setter.get()} },
     connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
-    conMenu(conParams, &clickedCon),
+    conMenu(conParams, &clickedCon, this),
     nodeMenu(nodeParams, &clickedNode)
 {
     paramTree.addChild(nodeParams, 0, nullptr);
@@ -37,9 +37,8 @@ MainComponent::MainComponent()
         availableNodes.push(i);
     }
     addAndMakeVisible(nodePanel);
-    addAndMakeVisible(controlsPanel);
+    addAndMakeVisible(samplePanel);
     nodePanel.setInterceptsMouseClicks(false, true);
-
     /*Extra main controls, could put these elsewhere?*/
     mainFreqSlider.setSliderStyle(Slider::SliderStyle::Rotary);
     mainFreqSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxRight, false, 50, 20);
@@ -75,11 +74,10 @@ MainComponent::MainComponent()
         "Select file to open"));  // text when nothing selected
 
     addAndMakeVisible(fileComp.get());
-    fileComp->addListener(this);
+    //fileComp->addListener(this);
     fileLabel.setText("Choose Sample", dontSendNotification);
     fileLabel.attachToComponent(fileComp.get(), true);
     addAndMakeVisible(&fileLabel);
-    currentPanel = nullptr;
     setSize (1000, 600);
     makeNode(100, 200);
     makeNode(400, 200);
@@ -98,6 +96,7 @@ void MainComponent::paint (Graphics& g)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (conParams.getChild(i).getProperty("active")) {
+            cons[i]->recalculatePath();
             g.setColour(Colours::black);
             g.fillPath(*cons[i]->getPath());
             g.setColour(Colours::antiquewhite);
@@ -128,7 +127,7 @@ void MainComponent::resized()
 
     grid.templateRows = { Track(5_fr), Track(1_fr) };
     grid.templateColumns = { Track(1_fr)};
-    grid.items = { GridItem(nodePanel), GridItem(currentPanel) };
+    grid.items = { GridItem(nodePanel), GridItem(samplePanel) };
     grid.performLayout(getLocalBounds());
 }
 
@@ -145,9 +144,6 @@ void MainComponent::mouseDown(const MouseEvent& e)
     if(node != 0) {
         node->setNodeColour(Colours::white);
         clickedNode = node->getNodeNumber();
-        controlsPanel.setValues(node);
-        currentPanel = &controlsPanel;
-        currentPanel->setVisible(true);
         resized();
         return;
     }
@@ -228,7 +224,7 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     int connectionIndex = getConnectionIndex(from->getNodeNumber(), to->getNodeNumber());
     if (connectionIndex < 0) return;
     if (cons[connectionIndex] == nullptr) {
-        cons[connectionIndex].reset(new CPGConnection{ to, from });
+        cons[connectionIndex].reset(new CPGConnection{ to, from, conParams.getChild(connectionIndex) });
         setter->setWeight(to->getNodeNumber(),
             from->getNodeNumber(),
             cons[connectionIndex]->calculateWeight(1.0)
@@ -262,7 +258,7 @@ ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
         .setProperty("from", 0, nullptr)
         .setProperty("to", 0, nullptr)
         .setProperty("weight", 1.0, nullptr)
-        .setProperty("weightDir", 0.5, nullptr)
+        .setProperty("weightDir", 0.0, nullptr)
         .setProperty("lengthMod", 0.0, nullptr)
         .setProperty("lengthModDir", 0.0, nullptr)
         .setProperty("startMod", 0.0, nullptr)
@@ -302,9 +298,13 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
     repaint();
 }
 
-void MainComponent::filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) 
+void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-    if (fileComponentThatHasChanged == fileComp.get()) {
-        setter->setFile(fileComp->getCurrentFile().getFullPathName());
-    }
+    setter->setFile(samplePanel.getFileName());
 }
+
+/*void MainComponent::filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) 
+{
+    setter->setFile(fileComp->getCurrentFile().getFullPathName());
+    //samplePanel.shouldShowWaveform(true);
+}*/

@@ -10,7 +10,8 @@
 
 #include "CPGConnection.h"
 
-CPGConnection::CPGConnection(Component* parent, Component* connectedTo)
+CPGConnection::CPGConnection(Component* parent, Component* connectedTo, ValueTree conParams)
+    :params(conParams)
 {
     this->parent = parent;
     this->connectedTo = connectedTo;
@@ -34,12 +35,11 @@ Identifier CPGConnection::getId()
 
 void CPGConnection::recalculatePath()
 {
-    
     double weight = params.getPropertyAsValue("weight", nullptr).getValue();
-    double direction = params.getPropertyAsValue("direction", nullptr).getValue();
+    double direction = params.getPropertyAsValue("weightDir", nullptr).getValue();
     double fWeight = weight * (1 - direction);
     weight *= direction;
-    /*Probably nicer way to do this*/
+    /*Probably nicer way to do this, this seems inefficient*/
     juce::Point<int> parentPos = CPGConnection::getCentre(parent);
     juce::Point<int> connectedPos = CPGConnection::getCentre(connectedTo);
     int distance = parentPos.getDistanceFrom(connectedPos);
@@ -51,9 +51,17 @@ void CPGConnection::recalculatePath()
     juce::Point<int> connectedEdge = connectedPos + (parentPos - connectedPos) * ((double)35.0 / distance);
     Line<int> betweenPoints{ lineStart, lineEnd };
     path.clear();
-    path.addLineSegment(betweenPoints.toFloat(), 5.0f);
-    path.addArrow(Line<int>{lineStart, parentEdge}.toFloat(), 5.0f, 40.0f, 500.0f);
-    path.addArrow(Line<int>{lineEnd, connectedEdge}.toFloat(), 5.0f, 40.0f, 500.0f);
+    path.addLineSegment(betweenPoints.toFloat(), 7.0f);
+    path.addArrow(Line<int>{lineStart, parentEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
+    path.addArrow(Line<int>{lineEnd, connectedEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
+
+
+    /*
+    weight = params.getPropertyAsValue("lengthMod", nullptr).getValue();
+    direction = params.getPropertyAsValue("lengthModDir", nullptr).getValue();
+    fWeight = weight * (1 - direction);
+    weight *= direction;
+    
     bandPath.clear();
     double distanceFromLineStart = jmin(20.0 / betweenPoints.getLength(), (double)betweenPoints.getLength() / 2);
     juce::Point<int> bandPoint = lineStart + (lineEnd - lineStart) * distanceFromLineStart;
@@ -63,6 +71,7 @@ void CPGConnection::recalculatePath()
     juce::Line<int> band2{ lineStart, bandPoint };
     band2.applyTransform(AffineTransform::rotation(MathConstants<float>::halfPi, bandPoint.getX(), bandPoint.getY()));
     bandPath.addLineSegment(band2.toFloat(), 5.0f);
+    */
 }
 
 Path* CPGConnection::getPath()

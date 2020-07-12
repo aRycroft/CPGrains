@@ -12,12 +12,12 @@
 #include "CPGLookAndFeel.h"
 #include "CPGNode.h"
 #include "OSCParamSetter.h"
-#include "NodeControls.h"
 #include "NodeChangeListener.h"
 #include "ConnectionChangeListener.h"
 #include <stack>
 #include "ConnectionMenu.h"
 #include "NodeMenu.h"
+#include "SamplePicker.h"
 #define NUM_NODES 4
 #define NUM_CONNECTIONS (NUM_NODES * (NUM_NODES - 1)) / 2
 #define NODESIZE 70
@@ -31,8 +31,8 @@ class MainComponent   : public Component,
                         public ComponentListener,
                         public Button::Listener,
                         public Slider::Listener,
-                        public FilenameComponentListener,
-                        public ValueTree::Listener
+                        public ValueTree::Listener,
+                        public ChangeListener
 {
 public:
     //==============================================================================
@@ -47,7 +47,8 @@ public:
     void buttonClicked(Button* button) override;
     void sliderValueChanged(Slider* slider) override;
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
-    void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    //void filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) override;
 private:
     void makeNode(int x, int y);
     void deleteNode(int nodeId);
@@ -62,9 +63,7 @@ private:
 
     CPGLookAndFeel LandF;
     Component nodePanel;
-    NodeControls controlsPanel;
-    ControlInterface* currentPanel;
-
+    SamplePicker samplePanel;
     TextButton addNodeButton;
     ToggleButton DSPButton;
     Slider mainFreqSlider;

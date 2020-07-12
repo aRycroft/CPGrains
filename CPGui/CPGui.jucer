@@ -2,6 +2,7 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
+    <FILE id="K4BkJD" name="SamplePicker.h" compile="0" resource="0" file="Source/SamplePicker.h"/>
     <FILE id="wDSYpD" name="NodeMenu.h" compile="0" resource="0" file="Source/NodeMenu.h"/>
     <FILE id="RaD76q" name="ConnectionMenu.h" compile="0" resource="0"
           file="Source/ConnectionMenu.h"/>
@@ -9,9 +10,6 @@
           file="Source/ConnectionChangeListener.h"/>
     <FILE id="uNSAs4" name="NodeChangeListener.h" compile="0" resource="0"
           file="Source/NodeChangeListener.h"/>
-    <FILE id="M0TpRT" name="ControlInterface.h" compile="0" resource="0"
-          file="Source/ControlInterface.h"/>
-    <FILE id="erTFLy" name="NodeControls.h" compile="0" resource="0" file="Source/NodeControls.h"/>
     <FILE id="qWHuMw" name="CPGConnection.cpp" compile="1" resource="0"
           file="Source/CPGConnection.cpp"/>
     <FILE id="CgoYiO" name="CPGConnection.h" compile="0" resource="0" file="Source/CPGConnection.h"/>
