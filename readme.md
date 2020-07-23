@@ -1,7 +1,7 @@
 ## Install + Run
 1. Download this https://github.com/DanBennettDev/max_cpg to your Max/MSP packages folder. 
 2. Install the CNMAT externals from the Max/MSP package manager.
-3. Download CPGrains repo and run CPGrains.maxpat, turn on the patch in the bottom right.
+3. Download CPGrains repo and run CPGrains.maxpat, turn on the patch with the white button in the bottom right.
 4. Run CPGui.exe or .app to control the patch.
 
 ## CPGui Controls
