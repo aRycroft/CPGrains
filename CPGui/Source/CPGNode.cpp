@@ -11,12 +11,12 @@
 #include "CPGNode.h"
 #include "CPGConnection.h"
 
-CPGNode::CPGNode(int nodeNo, int x, int y)
+CPGNode::CPGNode(int nodeNo, int x, int y, juce::Colour colour)
 {
 	nodeNumber = nodeNo;
 	this->setComponentID(String(nodeNo));
 	this->setCentrePosition(x, y);	
-	setNodeColour(Colours::orange);
+	defaultColour = activeColour = colour;
 	addParams();
 }
 
@@ -24,7 +24,7 @@ void CPGNode::paint(Graphics& g)
 {
 	auto area = getLocalBounds().reduced(1);
 
-	g.setColour(colour);
+	g.setColour(activeColour);
 	if (isActive) {
 		g.fillRoundedRectangle(area.toFloat(), 100.0f);
 	}
@@ -59,9 +59,9 @@ void CPGNode::mouseDrag(const MouseEvent& e)
 void CPGNode::mouseUp(const MouseEvent& event) {
 }
 
-
-void CPGNode::setNodeColour(juce::Colour newColour)
+void CPGNode::setActiveNodeColour(juce::Colour newColour)
 {
-	colour = newColour;
+	activeColour = newColour;
 	repaint();
 }
+

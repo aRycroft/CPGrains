@@ -52,12 +52,17 @@ public:
 private:
     void setUpConnectionMenu()
     {
+        int height = 20;
         /*This is pretty bad*/
         this->addItem(1, "Delete Connection");
         weightSlider.setNormalisableRange(NormalisableRange<double>(0.0, 10.0, 0.01, 1.0));
-        this->addCustomItem(-1, weightSlider, 50, 60, false);
+        weightLabel.setText("Weight", dontSendNotification);
+        this->addCustomItem(-1, weightLabel, 50, height, false);
+        this->addCustomItem(-1, weightSlider, 50, height, false);
         directionSlider.setNormalisableRange(NormalisableRange<double>(0.0, 1.0, 0.01, 1.0));
-        this->addCustomItem(-1, directionSlider, 50, 60, false);
+        directionLabel.setText("Direction", dontSendNotification);
+        this->addCustomItem(-1, directionLabel, 50, height, false);
+        this->addCustomItem(-1, directionSlider, 50, height, false);
         weightButton.onClick = [this] {
             lengthButton.setToggleState(false, dontSendNotification);
             positionButton.setToggleState(false, dontSendNotification);
@@ -77,15 +82,20 @@ private:
             changeMenuSliders("startMod", "startModDir", 0.0, 5000.0);
         };
         weightButton.setToggleState(true, dontSendNotification);
-        this->addCustomItem(-1, weightButton, 50, 50, false);
-        this->addCustomItem(-1, lengthButton, 50, 50, false);
-        this->addCustomItem(-1, positionButton, 50, 50, false);
+        weightBLabel.setText("Rhythm Connection", dontSendNotification);
+        this->addCustomItem(-1, weightBLabel, 50, height, false);
+        this->addCustomItem(-1, weightButton, 50, height, false);
+        lengthBLabel.setText("Grain Size Modifier", dontSendNotification);
+        this->addCustomItem(-1, lengthBLabel, 50, height, false);
+        this->addCustomItem(-1, lengthButton, 50, height, false);
+        posBLabel.setText("Grain Position Modifier", dontSendNotification);
+        this->addCustomItem(-1, posBLabel, 50, height, false);
+        this->addCustomItem(-1, positionButton, 50, height, false);
         changeMenuSliders("weight", "weightDir", 0.0, 10.0);
     }
-
-
     Slider weightSlider, directionSlider;
     ToggleButton weightButton, lengthButton, positionButton;
+    Label weightLabel, directionLabel, weightBLabel, lengthBLabel, posBLabel;
     ValueTree conParams;
     int* clickedCon;
     Component* parent;

@@ -53,17 +53,13 @@ private:
     void makeNode(int x, int y);
     void deleteNode(int nodeId);
     void makeConnection(CPGNode* from, CPGNode* to);
-    /*void showConnectionMenu(int connectionIndex);
-    void changeMenuSliders(Identifier i, Identifier direction);
-    void setUpConnectionMenu();
-    */void setUpMenu() {};
+    void deleteConnection(int conId);
     ValueTree makeNodeValueTree(int nodeId);
     ValueTree makeConnectionValueTree(int connectionIndex);
     int getConnectionIndex(int from, int to);
 
     CPGLookAndFeel LandF;
     Component nodePanel;
-    SamplePicker samplePanel;
     TextButton addNodeButton;
     ToggleButton DSPButton;
     Slider mainFreqSlider;
@@ -85,7 +81,13 @@ private:
     std::unique_ptr<ConnectionChangeListener> connectionChangeListener;
     ConnectionMenu conMenu;
     NodeMenu nodeMenu;
-
+    SamplePicker samplePanel;
+    String colours[NUM_NODES] = { 
+        Colours::aqua.toString(),
+        Colours::red.toString(),
+        Colours::mediumpurple.toString(),
+        Colours::green.toString()
+    };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
     

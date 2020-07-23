@@ -13,12 +13,16 @@
 
 struct SamplePicker : public Component,
                       public ChangeListener,
-                      public Button::Listener{
-    SamplePicker(ChangeListener* listener)
+                      public Button::Listener,
+                      public ValueTree::Listener
+{
+    SamplePicker(ChangeListener* listener, ValueTree nodeParams)
         :
         waveformCache(5),
-        waveform(512, waveformManager, waveformCache) 
+        waveform(512, waveformManager, waveformCache),
+        params(nodeParams)
     {
+        params.addListener(this);
         addAndMakeVisible(openButton);
         openButton.setButtonText("Click here to select a sample..");
         openButton.addListener(this);
@@ -39,7 +43,20 @@ struct SamplePicker : public Component,
                 0.0,
                 waveform.getTotalLength(),
                 1.0f);
+            for (int i{ 0 }; i < params.getNumChildren(); i++) {
+                ValueTree child = params.getChild(i);
+                if (child.getProperty("active")) {
+                    g.setColour(juce::Colour::fromString(child.getProperty("colour").toString()));
+                    g.setOpacity(0.6);
+                    float positionInWaveform = (float)child.getProperty("startTime") * getWidth();
+                    juce::Line<float> line{ positionInWaveform, 0, positionInWaveform, (float)getHeight() };
+                    double length = (double)child.getProperty("grainLength") * getWidth() / (waveform.getTotalLength() * 1000.0);
+                    length = juce::jmax(length, 3.0);
+                    g.drawLine(line, length);
+                }
+            }
         }
+        
     }
     void resized() override
     {
@@ -70,6 +87,10 @@ struct SamplePicker : public Component,
         }
     }
 
+    void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
+        repaint();
+    }
+
     String getFileName() {
         return chooser->getResult().getFullPathName();
     }
@@ -83,4 +104,5 @@ private:
     bool showWaveform{ false };
     juce::TextButton openButton;
     juce::ChangeListener* listener;
+    juce::ValueTree params;
 };

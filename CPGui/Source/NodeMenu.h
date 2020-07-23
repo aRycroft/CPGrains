@@ -38,15 +38,24 @@ public:
 
 private:
     void setUpMenu() {
+        this->addItem(1, "Delete Node");
+        int height = 20;
         size.setNormalisableRange(NormalisableRange<double>(5.0f, 5000.0f, 0.1f, 0.25f));
-        this->addCustomItem(-1, size, 200, 60, false);
-        pos.setNormalisableRange(NormalisableRange<double>(0.0f, 1000.0f, 0.01f, 1.0f));
-        this->addCustomItem(-1, pos, 200, 60, false);
-        frequency.setNormalisableRange(NormalisableRange<double>(0.03125f, 200.0f, 0.01f, 1.0f));
-        this->addCustomItem(-1, frequency, 200, 60, false);
+        sizeLabel.setText("Grain Size", dontSendNotification);
+        this->addCustomItem(-1, sizeLabel, 200, height, false);
+        this->addCustomItem(-1, size, 200, height, false);
+        pos.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f, 1.0f));
+        posLabel.setText("Position in Waveform", dontSendNotification);
+        this->addCustomItem(-1, posLabel, 200, height, false);
+        this->addCustomItem(-1, pos, 200, height, false);
+        frequency.setNormalisableRange(NormalisableRange<double>(0.03125f, 200.0f, 0.01f, 0.5f));
+        frequencyLabel.setText("Grain Density", dontSendNotification);
+        this->addCustomItem(-1, frequencyLabel, 200, height, false);
+        this->addCustomItem(-1, frequency, 200, height, false);
     }
 
     Slider size, pos, frequency;
+    Label sizeLabel, posLabel, frequencyLabel;
     ValueTree nodeParams;
     int* clickedNode;
 };

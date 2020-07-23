@@ -16,13 +16,18 @@ class CPGNode : public Component
 {
 public:
 	CPGNode() {};
-	CPGNode(int nodeNo, int x, int y);
+	//CPGNode(int nodeNo, int x, int y);
+	CPGNode(int nodeNo, int x, int y, juce::Colour colour);
 	void paint(Graphics& g) override;
 	void resized() override;
 	void mouseDown(const MouseEvent& e) override;
 	void mouseDrag(const MouseEvent& e) override;
 	void mouseUp(const MouseEvent& event);
-	void setNodeColour(juce::Colour newColour);
+	void setActiveNodeColour(juce::Colour newColour);
+	void useDefaultColour() {
+		activeColour = defaultColour;
+		repaint();
+	};
 	float getPropertyValue(Identifier i) { return 0.0f; };
 	void addParams() {};
 	void setParam(Identifier i, double val) {};
@@ -38,7 +43,8 @@ private:
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
 	bool isActive{ true };
-	juce::Colour colour;
+	juce::Colour defaultColour;
+	juce::Colour activeColour;
 	int nodeNumber;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPGNode)
 };

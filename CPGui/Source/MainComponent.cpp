@@ -11,7 +11,7 @@
 //==============================================================================
 MainComponent::MainComponent()
     :
-    samplePanel(this),
+    samplePanel(this, nodeParams),
     setter{ new OSCParamSetter(8000) },
     nodeChangeListener{ new NodeChangeListener{ paramTree, setter.get()} },
     connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
@@ -23,9 +23,7 @@ MainComponent::MainComponent()
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
         nodeParams.addChild(makeNodeValueTree(i), i, nullptr);
-
     }
-    DBG(NUM_CONNECTIONS);
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         conParams.addChild(makeConnectionValueTree(i), i, nullptr);
     }
@@ -36,21 +34,11 @@ MainComponent::MainComponent()
     for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
         availableNodes.push(i);
     }
+
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(samplePanel);
     nodePanel.setInterceptsMouseClicks(false, true);
     /*Extra main controls, could put these elsewhere?*/
-    mainFreqSlider.setSliderStyle(Slider::SliderStyle::Rotary);
-    mainFreqSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxRight, false, 50, 20);
-    mainFreqSlider.setNormalisableRange(NormalisableRange<double>(0.01, 200.0f, 0.0001f, 1.0f));
-    mainFreqSlider.onValueChange = [this] {
-        setter->setParam("mainFreq", 0, mainFreqSlider.getValue());
-    };
-    addAndMakeVisible(&mainFreqSlider);
-    mFreqLabel.setText("Main Frequency", dontSendNotification);
-    mFreqLabel.attachToComponent(&mainFreqSlider, true);
-    addAndMakeVisible(&mFreqLabel);
-
     addNodeButton.addListener(this);
     addAndMakeVisible(&addNodeButton);
     addButtonLabel.setText("Add Node", dontSendNotification);
@@ -62,28 +50,12 @@ MainComponent::MainComponent()
     DSPLabel.setText("Toggle DSP", dontSendNotification);
     DSPLabel.attachToComponent(&DSPButton, true);
     addAndMakeVisible(&DSPLabel);
-    File f{};
-    f = f.getCurrentWorkingDirectory().getSiblingFile("Samples/Guitar.wav");
-    fileComp.reset(new FilenameComponent("fileComp",
-        {f},                       // current file
-        false,                    // can edit file name,
-        false,                    // is directory,
-        false,                    // is for saving,
-        {},                       // browser wildcard suffix,
-        {},                       // enforced suffix,
-        "Select file to open"));  // text when nothing selected
 
-    addAndMakeVisible(fileComp.get());
-    //fileComp->addListener(this);
-    fileLabel.setText("Choose Sample", dontSendNotification);
-    fileLabel.attachToComponent(fileComp.get(), true);
     addAndMakeVisible(&fileLabel);
     setSize (1000, 600);
     makeNode(100, 200);
-    makeNode(400, 200);
-    //makeNode(400, 400);
-    makeConnection(nodes[0].get(), nodes[1].get());
-    setUpMenu();
+    //makeNode(400, 200);
+   // makeConnection(nodes[0].get(), nodes[1].get());
 }
 
 MainComponent::~MainComponent()
@@ -93,7 +65,7 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (juce::Colours::darkslategrey);
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (conParams.getChild(i).getProperty("active")) {
             cons[i]->recalculatePath();
@@ -108,10 +80,8 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     int width = getWidth();
-    fileComp->setBounds(width - 150, 0, 150, 50);
-    mainFreqSlider.setBounds(width - 150, 50, 120, 120);
-    addNodeButton.setBounds(width - 150, 170, 50, 50);
-    DSPButton.setBounds(width - 150, 220, 50, 50);
+    addNodeButton.setBounds(width - 100, 25, 50, 50);
+    DSPButton.setBounds(width - 100, 100, 50, 50);
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
         if (nodeParams.getChild(i).getProperty("active")) {
@@ -138,11 +108,11 @@ void MainComponent::mouseDown(const MouseEvent& e)
         makeConnection(nodes[clickedNode].get(), node);
     }
     if (clickedNode != -1) {
-        nodes[clickedNode]->setNodeColour(Colours::orange);
+        nodes[clickedNode]->useDefaultColour();
         clickedNode = -1;
     }
     if(node != 0) {
-        node->setNodeColour(Colours::white);
+        node->setActiveNodeColour(Colours::white);
         clickedNode = node->getNodeNumber();
         resized();
         return;
@@ -150,7 +120,10 @@ void MainComponent::mouseDown(const MouseEvent& e)
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (cons[i] != nullptr && cons[i]->containsPoint(e.getMouseDownPosition().toFloat())) {
             clickedCon = i;
-            conMenu.showMenu();
+            const int deleteConRequested = conMenu.showMenu();
+            if (deleteConRequested) {
+                deleteConnection(i);
+            }
             return;
         }
     }
@@ -160,17 +133,10 @@ void MainComponent::mouseDoubleClick(const MouseEvent& e) {
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (node == 0) return;
     clickedNode = node->getNodeNumber();
-    nodeMenu.showMenu();
-
-
-    /*node->toggleActive();
-    node->repaint();
-    if (node->nodeIsActive()) {
-        setter->setParam("active", node->getNodeNumber(), 0);
+    const int deleteNodeRequested = nodeMenu.showMenu();
+    if (deleteNodeRequested) {
+        deleteNode(clickedNode);
     }
-    else {
-        setter->setParam("active", node->getNodeNumber(), 1);
-    }*/
 }
 
 void MainComponent::buttonClicked(Button* button)
@@ -194,7 +160,7 @@ void MainComponent::makeNode(int x, int y)
     if (availableNodes.empty()) return;
     int nodeId = availableNodes.top();
     availableNodes.pop();
-    nodes[nodeId].reset(new CPGNode(nodeId, x, y));
+    nodes[nodeId].reset(new CPGNode(nodeId, x, y, juce::Colour::fromString(colours[nodeId])));
     nodes[nodeId]->addComponentListener(this);
     nodes[nodeId]->addMouseListener(this ,false);
     nodePanel.addAndMakeVisible(nodes[nodeId].get());
@@ -206,15 +172,14 @@ void MainComponent::makeNode(int x, int y)
 void MainComponent::deleteNode(int nodeId) {
     availableNodes.push(nodeId);
     nodeParams.getChild(nodeId).setProperty("active", false, nullptr);
-    nodes[nodeId - 1].reset();
-    for (int i{ 1 }; i <= NUM_NODES; i++) {
+    nodes[nodeId].reset();
+    for (int i{ 0 }; i < NUM_NODES; i++) {
         int connectionIndex = getConnectionIndex(nodeId, i);
         if (nodeId != i && cons[connectionIndex] != nullptr) {
-            setter->setWeight(nodeId, i, 0.0);
-            setter->setWeight(i, nodeId, 0.0);
-            cons[connectionIndex].reset();
+            deleteConnection(connectionIndex);
         }
     }
+    clickedNode = -1;
     repaint();
 }
 
@@ -237,6 +202,18 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     repaint(); 
 }
 
+void MainComponent::deleteConnection(int conId)
+{
+    CPGNode* connected = (CPGNode*)cons[conId]->getConnected();
+    CPGNode* parent = (CPGNode*)cons[conId]->getParent();
+    cons[conId].reset();
+    conParams.getChild(conId).setProperty("active", false, nullptr);
+    conParams.getChild(conId).setProperty("weight", 0.0, nullptr);
+    conParams.getChild(conId).setProperty("lengthMod", 0.0, nullptr);
+    conParams.getChild(conId).setProperty("startMod", 0.0, nullptr);
+    clickedCon = -1;
+    repaint();
+}
 
 ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {
@@ -248,7 +225,9 @@ ValueTree MainComponent::makeNodeValueTree(int nodeId)
         .setProperty("startTime", 0.0, nullptr)
         .setProperty("frequency", 1.0, nullptr)
         .setProperty("pan", 0.f, nullptr)
-        .setProperty("volume", 0.7, nullptr);
+        .setProperty("volume", 0.7, nullptr)
+        .setProperty("colour", colours[nodeId], nullptr);
+        
 }
 
 ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
