@@ -2,6 +2,11 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
+    <FILE id="nhJm67" name="MixerMenu.h" compile="0" resource="0" file="Source/MixerMenu.h"/>
+    <FILE id="cAGjbQ" name="MixerChangeListener.h" compile="0" resource="0"
+          file="Source/MixerChangeListener.h"/>
+    <FILE id="JECg5U" name="GrainPositionSliderBox.h" compile="0" resource="0"
+          file="Source/GrainPositionSliderBox.h"/>
     <FILE id="K4BkJD" name="SamplePicker.h" compile="0" resource="0" file="Source/SamplePicker.h"/>
     <FILE id="wDSYpD" name="NodeMenu.h" compile="0" resource="0" file="Source/NodeMenu.h"/>
     <FILE id="RaD76q" name="ConnectionMenu.h" compile="0" resource="0"

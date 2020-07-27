@@ -19,7 +19,7 @@ public:
         setter = paramSetter;
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
-        if (property == grainLength || property == startTime || property == frequency) {
+        if (property == grainLength || property == startTime || property == frequency || property == pan || property == volume) {
             setter->setParam(property.toString(), vTree.getType().toString().getIntValue(), vTree.getProperty(property));
         }
     };
@@ -29,4 +29,6 @@ private:
     Identifier grainLength{ "grainLength" };
     Identifier startTime{ "startTime" };
     Identifier frequency{ "frequency" };
+    Identifier pan{ "pan" };
+    Identifier volume{ "volume" };
 };

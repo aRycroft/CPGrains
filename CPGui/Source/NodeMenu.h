@@ -49,7 +49,7 @@ private:
         this->addCustomItem(-1, posLabel, 200, height, false);
         this->addCustomItem(-1, pos, 200, height, false);
         frequency.setNormalisableRange(NormalisableRange<double>(0.03125f, 200.0f, 0.01f, 0.5f));
-        frequencyLabel.setText("Grain Density", dontSendNotification);
+        frequencyLabel.setText("Grains Per Second", dontSendNotification);
         this->addCustomItem(-1, frequencyLabel, 200, height, false);
         this->addCustomItem(-1, frequency, 200, height, false);
     }

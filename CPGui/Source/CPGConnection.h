@@ -10,25 +10,26 @@
 
 #pragma once
 #include "JuceHeader.h"
+#include "CPGNode.h"
+
 class CPGConnection 
 {
 public:
-    CPGConnection(Component* parent, Component* connectedTo, ValueTree conParams);
-    Component* getConnected();
-    Component* getParent();
+    CPGConnection(CPGNode* parent, CPGNode* connectedTo, ValueTree conParams);
+    CPGNode* getConnected();
+    int getConnectedNumber();
+    CPGNode* getParent();
+    int getParentNumber();
     Identifier getId();
     int weight = 0;
     void recalculatePath();
     Path* getPath();
     Path* getParameterPathBands();
     float calculateWeight(double mult);
-    double getPropertyValue(Identifier i);
     bool containsPoint(Point<float> p);
-    void setParam(Identifier i, double val);
 private:
     static Point<int> getCentre(Component* comp);
-    void addParams();
-    Component *connectedTo, *parent;
+    CPGNode *connectedTo, *parent;
     Path path, bandPath;
     ValueTree params;
 };

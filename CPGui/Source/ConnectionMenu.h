@@ -36,8 +36,8 @@ public:
 
     void changeMenuSliders(String weight, String direction, double startValue, double endValue)
     {
-        weightSlider.setValue(conParams.getChild(*clickedCon).getProperty(weight), dontSendNotification);
         weightSlider.setNormalisableRange(NormalisableRange<double>(startValue, endValue, 0.01, 1.0));
+        weightSlider.setValue(conParams.getChild(*clickedCon).getProperty(weight), dontSendNotification);
         directionSlider.setValue(conParams.getChild(*clickedCon).getProperty(direction), dontSendNotification);
         weightSlider.onValueChange = [this, weight] {
             conParams.getChild(*clickedCon).setProperty(weight, weightSlider.getValue(), nullptr);
@@ -82,13 +82,13 @@ private:
             changeMenuSliders("startMod", "startModDir", 0.0, 5000.0);
         };
         weightButton.setToggleState(true, dontSendNotification);
-        weightBLabel.setText("Rhythm Connection", dontSendNotification);
+        weightBLabel.setText("CPG Connection", dontSendNotification);
         this->addCustomItem(-1, weightBLabel, 50, height, false);
         this->addCustomItem(-1, weightButton, 50, height, false);
-        lengthBLabel.setText("Grain Size Modifier", dontSendNotification);
+        lengthBLabel.setText("Grain Size Modifier (Multiplied by CPG signal)", dontSendNotification);
         this->addCustomItem(-1, lengthBLabel, 50, height, false);
         this->addCustomItem(-1, lengthButton, 50, height, false);
-        posBLabel.setText("Grain Position Modifier", dontSendNotification);
+        posBLabel.setText("Grain Position Modifier (Multiplied by CPG signal)", dontSendNotification);
         this->addCustomItem(-1, posBLabel, 50, height, false);
         this->addCustomItem(-1, positionButton, 50, height, false);
         changeMenuSliders("weight", "weightDir", 0.0, 10.0);

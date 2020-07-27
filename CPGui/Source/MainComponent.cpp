@@ -15,28 +15,41 @@ MainComponent::MainComponent()
     setter{ new OSCParamSetter(8000) },
     nodeChangeListener{ new NodeChangeListener{ paramTree, setter.get()} },
     connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
+    mixerChangeListener{ new MixerChangeListener{ paramTree, setter.get()} },
     conMenu(conParams, &clickedCon, this),
     nodeMenu(nodeParams, &clickedNode)
 {
     paramTree.addChild(nodeParams, 0, nullptr);
     paramTree.addChild(conParams, 1, nullptr);
+    paramTree.addChild(mixerParams, 2, nullptr);
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
         nodeParams.addChild(makeNodeValueTree(i), i, nullptr);
+        mixerParams.addChild(makeMixerValueTree(i), i, nullptr);
     }
+ 
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         conParams.addChild(makeConnectionValueTree(i), i, nullptr);
     }
 
+    mixerParams.setProperty("pan", 0.5, nullptr);
+    mixerParams.setProperty("volume", 1.0, nullptr);
+
     nodeParams.addListener(nodeChangeListener.get());
     conParams.addListener(connectionChangeListener.get());
+    //nodeParams.addListener(mixerChangeListener.get());
+    mixerParams.addListener(mixerChangeListener.get());
 
     for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
         availableNodes.push(i);
     }
 
+    mixerMenu.reset(new MixerMenu(mixerParams));
+
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(samplePanel);
+    addChildComponent(mixerMenu.get());
+
     nodePanel.setInterceptsMouseClicks(false, true);
     /*Extra main controls, could put these elsewhere?*/
     addNodeButton.addListener(this);
@@ -51,9 +64,13 @@ MainComponent::MainComponent()
     DSPLabel.attachToComponent(&DSPButton, true);
     addAndMakeVisible(&DSPLabel);
 
-    addAndMakeVisible(&fileLabel);
+    toggleMixer.addListener(this);
+    addAndMakeVisible(&toggleMixer);
+    toggleMixerLabel.setText("Toggle Mixer", dontSendNotification);
+    toggleMixerLabel.attachToComponent(&toggleMixer, true);
+    addAndMakeVisible(&toggleMixerLabel);
     setSize (1000, 600);
-    makeNode(100, 200);
+    //makeNode(100, 200);
     //makeNode(400, 200);
    // makeConnection(nodes[0].get(), nodes[1].get());
 }
@@ -82,6 +99,7 @@ void MainComponent::resized()
     int width = getWidth();
     addNodeButton.setBounds(width - 100, 25, 50, 50);
     DSPButton.setBounds(width - 100, 100, 50, 50);
+    toggleMixer.setBounds(width - 100, 150, 50, 50);
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
         if (nodeParams.getChild(i).getProperty("active")) {
@@ -89,15 +107,22 @@ void MainComponent::resized()
             test->setBounds(std::min(test->getParentWidth() - NODESIZE, test->getX()),
                 std::min(test->getParentHeight() - NODESIZE, test->getY()),
                 NODESIZE, NODESIZE);
+            Component* sliderBox = test->getSliderBox();
+            sliderBox->setBounds(sliderBox->getX(), sliderBox->getY(), sliderBox->getParentHeight() / 4, sliderBox->getParentHeight() / 4);
         }
     }
     Grid grid;
 
     using Track = Grid::TrackInfo;
-
+   
     grid.templateRows = { Track(5_fr), Track(1_fr) };
     grid.templateColumns = { Track(1_fr)};
-    grid.items = { GridItem(nodePanel), GridItem(samplePanel) };
+    if (mixerShowing) {
+        grid.items = { GridItem(nodePanel), GridItem(mixerMenu.get()) };
+    }
+    else {
+        grid.items = { GridItem(nodePanel), GridItem(samplePanel) };
+    }
     grid.performLayout(getLocalBounds());
 }
 
@@ -148,6 +173,18 @@ void MainComponent::buttonClicked(Button* button)
         DSPOn = !DSPOn;
         setter->setDSPState(DSPOn);
     }
+    else if (button == &toggleMixer) {
+        if (mixerShowing) {
+            mixerMenu->setVisible(false);
+            samplePanel.setVisible(true);
+        }
+        else {
+            mixerMenu->setVisible(true);
+            samplePanel.setVisible(false);
+        }
+        mixerShowing = !mixerShowing;
+        resized();
+    }
 }
 
 void MainComponent::sliderValueChanged(Slider* slider)
@@ -160,10 +197,11 @@ void MainComponent::makeNode(int x, int y)
     if (availableNodes.empty()) return;
     int nodeId = availableNodes.top();
     availableNodes.pop();
-    nodes[nodeId].reset(new CPGNode(nodeId, x, y, juce::Colour::fromString(colours[nodeId])));
+    nodes[nodeId].reset(new CPGNode(nodeId, x, y, nodeParams.getChild(nodeId), juce::Colour::fromString(colours[nodeId])));
     nodes[nodeId]->addComponentListener(this);
     nodes[nodeId]->addMouseListener(this ,false);
     nodePanel.addAndMakeVisible(nodes[nodeId].get());
+    samplePanel.addAndMakeVisible(nodes[nodeId]->getSliderBox());
     setter->setParam("active", nodeId, 0);
     nodeParams.getChild(nodeId).setProperty("active", true, nullptr);
     resized();
@@ -183,17 +221,13 @@ void MainComponent::deleteNode(int nodeId) {
     repaint();
 }
 
-
 void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
 {
     int connectionIndex = getConnectionIndex(from->getNodeNumber(), to->getNodeNumber());
     if (connectionIndex < 0) return;
     if (cons[connectionIndex] == nullptr) {
-        cons[connectionIndex].reset(new CPGConnection{ to, from, conParams.getChild(connectionIndex) });
-        setter->setWeight(to->getNodeNumber(),
-            from->getNodeNumber(),
-            cons[connectionIndex]->calculateWeight(1.0)
-        );
+        cons[connectionIndex].reset(new CPGConnection{ to, from, conParams.getChild(connectionIndex)});
+        connectionChangeListener->sendWeight(from->getNodeNumber(), to->getNodeNumber(), 1.0);
         conParams.getChild(connectionIndex).setProperty("active", true, nullptr);
         conParams.getChild(connectionIndex).setProperty("from", from->getNodeNumber(), nullptr);
         conParams.getChild(connectionIndex).setProperty("to", to->getNodeNumber(), nullptr);
@@ -204,8 +238,6 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
 
 void MainComponent::deleteConnection(int conId)
 {
-    CPGNode* connected = (CPGNode*)cons[conId]->getConnected();
-    CPGNode* parent = (CPGNode*)cons[conId]->getParent();
     cons[conId].reset();
     conParams.getChild(conId).setProperty("active", false, nullptr);
     conParams.getChild(conId).setProperty("weight", 0.0, nullptr);
@@ -224,10 +256,7 @@ ValueTree MainComponent::makeNodeValueTree(int nodeId)
         .setProperty("grainLength", 200.0, nullptr)
         .setProperty("startTime", 0.0, nullptr)
         .setProperty("frequency", 1.0, nullptr)
-        .setProperty("pan", 0.f, nullptr)
-        .setProperty("volume", 0.7, nullptr)
-        .setProperty("colour", colours[nodeId], nullptr);
-        
+        .setProperty("colour", colours[nodeId], nullptr);       
 }
 
 ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
@@ -242,6 +271,14 @@ ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
         .setProperty("lengthModDir", 0.0, nullptr)
         .setProperty("startMod", 0.0, nullptr)
         .setProperty("startModDir", 0.0, nullptr);
+}
+
+ValueTree MainComponent::makeMixerValueTree(int nodeId)
+{
+    return ValueTree{ Identifier{String{nodeId} } }
+        .setProperty("pan", 0.5f, nullptr)
+        .setProperty("volume", 0.7, nullptr)
+        .setProperty("colour", colours[nodeId], nullptr);
 }
 
 int MainComponent::getConnectionIndex(int from, int to)
@@ -263,15 +300,15 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
     if (node == 0) return;
     nodeParams.getChild(node->getNodeNumber()).setProperty("x", node->getX(), nullptr);
     nodeParams.getChild(node->getNodeNumber()).setProperty("y", node->getY(), nullptr);
+    int nodeNumber = node->getNodeNumber();
     for (int i{ 0 }; i < NUM_NODES; i++) {
-        int nodeNumber = node->getNodeNumber();
         int connectionIndex = getConnectionIndex(nodeNumber, i);
         if (nodeNumber != i && cons[connectionIndex] != nullptr) {
             cons[connectionIndex]->recalculatePath();
             double weight = conParams.getChild(connectionIndex).getPropertyAsValue("weight", nullptr).getValue();
             double dir = conParams.getChild(connectionIndex).getPropertyAsValue("weightDir", nullptr).getValue();
-            connectionChangeListener->sendWeight(nodeNumber, i, weight * dir);
-            connectionChangeListener->sendWeight(i, nodeNumber, weight * (1 - dir));
+            connectionChangeListener->sendWeight(cons[connectionIndex]->getParentNumber(), cons[connectionIndex]->getConnectedNumber(), weight * dir);
+            connectionChangeListener->sendWeight(cons[connectionIndex]->getConnectedNumber(), cons[connectionIndex]->getParentNumber(), weight * (1 - dir));
         }
     }
     repaint();

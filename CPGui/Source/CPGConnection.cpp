@@ -10,22 +10,31 @@
 
 #include "CPGConnection.h"
 
-CPGConnection::CPGConnection(Component* parent, Component* connectedTo, ValueTree conParams)
+CPGConnection::CPGConnection(CPGNode* parent, CPGNode* connectedTo, ValueTree conParams)
     :params(conParams)
 {
     this->parent = parent;
     this->connectedTo = connectedTo;
-    addParams();
 }
 
-Component* CPGConnection::getConnected()
+CPGNode* CPGConnection::getConnected()
 {
     return connectedTo;
 }
 
-Component* CPGConnection::getParent()
+int CPGConnection::getConnectedNumber()
+{
+    return connectedTo->getNodeNumber();
+}
+
+CPGNode* CPGConnection::getParent()
 {
     return parent;
+}
+
+int CPGConnection::getParentNumber()
+{
+    return parent->getNodeNumber();
 }
 
 Identifier CPGConnection::getId()
@@ -94,10 +103,6 @@ float CPGConnection::calculateWeight(double mult)
     return std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f);
 }
 
-double CPGConnection::getPropertyValue(Identifier i)
-{
-    return params.getPropertyAsValue(i, nullptr).getValue();
-}
 
 bool CPGConnection::containsPoint(Point<float> point)
 {
@@ -111,19 +116,5 @@ juce::Point<int> CPGConnection::getCentre(Component* comp)
     return juce::Point<int>(parentX, parentY);
 }
 
-void CPGConnection::addParams()
-{
-    params.setProperty("weight", 1.0, nullptr);
-    params.setProperty("direction", 0.0, nullptr);
-    params.setProperty("lengthWeight", 1.0, nullptr);
-    params.setProperty("lengthDirection", 0.0, nullptr);
-    params.setProperty("posWeight", 1.0, nullptr);
-    params.setProperty("posDirection", 0.0, nullptr);
-}
-
-void CPGConnection::setParam(Identifier i, double val)
-{
-    params.setProperty(i, val, nullptr);
-}
 
 

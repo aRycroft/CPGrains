@@ -11,13 +11,13 @@
 #include "CPGNode.h"
 #include "CPGConnection.h"
 
-CPGNode::CPGNode(int nodeNo, int x, int y, juce::Colour colour)
+CPGNode::CPGNode(int nodeNo, int x, int y, juce::ValueTree tree, juce::Colour colour)
+	:nodeTree(tree)
 {
 	nodeNumber = nodeNo;
-	this->setComponentID(String(nodeNo));
 	this->setCentrePosition(x, y);	
 	defaultColour = activeColour = colour;
-	addParams();
+	sliderBox.reset(new GrainPositionSliderBox(tree, colour));
 }
 
 void CPGNode::paint(Graphics& g)
@@ -33,7 +33,6 @@ void CPGNode::paint(Graphics& g)
 	}
 
 	g.setColour(Colours::black);
-	g.drawFittedText(getComponentID(), area, Justification::centred, 1);
 }
 
 void CPGNode::resized()
