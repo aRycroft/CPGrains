@@ -9,11 +9,29 @@ First select a sample using the button in the top right. Then click add node to 
 By selecting one node and shift-clicking another, a connection is formed between the nodes. By moving the grains around the screen the weight of each connection changes depending on the distance between the nodes.
 
 Shift-click : Create connection between nodes. <br/>
-Double-click : Disable node audio (the node still affects any nodes it is connected to)<br/>
-Clicking Connection : Deletes the connection.<br/>
+Double-click node: Open node menu. <br/>
+Click connection: Open connection menu. <br/>
 
 
 ## Project Log
+
+### 27th July
+Added v basic mixer, can switch to the mixer view with a toggle button. Also added samplepicker class, this displays where each node is playing in the sample waveform. Could change this so multiple samples can be selected in the system and displayed down here.
+NEXT STEPS:
+Add some indicator that node parameters are being modulated.
+
+Maybe move the modulation parameters into the node instead of in the connection menu. Could just have one value for any incoming signal i.e. for node 1 the range is modulated by 100 ms by ALL signals that are currently connected.
+
+Need to add more controls to the mixer - overall pan, volume and pitch. Maybe more?
+
+### 11th July
+Big refactors in the GUI code. Started using ValueTrees everywhere to store data rather than keeping data in each object. Much easier to use, I can listen to changes in the valuetrees rather than listening to slider value changes. Can also copy these around easily so can put them in different classes and modify the trees from there.
+
+Also changed the controls so that they appear in a pop-up menu instead of at the bottom of the screen. Can open these by double clicking nodes or just clicking a connection.
+
+### 30th June
+Started developing an all in one VST instead of using a max patch + GUI in JUCE. Think for this project it's not worth going down this route, as it will take a long time and I won't gain any extra functionality, will just be slightly easier to use. Time wise it makes more sense to continue developing in Max/MSP and in JUCE.
+
 ### 17th June
 Compiled a .app for Mac users. Updated readme to explain GUI controls, Video of the system in action 
 https://www.youtube.com/watch?v=nNSVt3vGWyQ
