@@ -32,8 +32,8 @@ MainComponent::MainComponent()
         conParams.addChild(makeConnectionValueTree(i), i, nullptr);
     }
 
-    mixerParams.setProperty("pan", 0.5, nullptr);
-    mixerParams.setProperty("volume", 1.0, nullptr);
+    mixerParams.setProperty(Ids::pan, 0.5, nullptr);
+    mixerParams.setProperty(Ids::volume, 1.0, nullptr);
 
     nodeParams.addListener(nodeChangeListener.get());
     conParams.addListener(connectionChangeListener.get());
@@ -195,11 +195,6 @@ void MainComponent::buttonClicked(Button* button)
     }
 }
 
-void MainComponent::sliderValueChanged(Slider* slider)
-{
-    nodeParams.getChild(clickedNode).setProperty(slider->getName(), slider->getValue(), nullptr);
-}
-
 void MainComponent::makeNode(int x, int y)
 {
     int nodeId = -1;
@@ -216,13 +211,13 @@ void MainComponent::makeNode(int x, int y)
     nodePanel.addAndMakeVisible(nodes[nodeId].get());
     samplePanel.addAndMakeVisible(nodes[nodeId]->getSliderBox());
     setter->setParam("active", nodeId, 0);
-    nodeParams.getChild(nodeId).setProperty("active", true, nullptr);
+    nodeParams.getChild(nodeId).setProperty(Ids::active, true, nullptr);
     resized();
 }
 
 void MainComponent::deleteNode(int nodeId) {
     availableNodes.push(nodeId);
-    nodeParams.getChild(nodeId).setProperty("active", false, nullptr);
+    nodeParams.getChild(nodeId).setProperty(Ids::active, false, nullptr);
     nodes[nodeId].reset();
     for (int i{ 0 }; i < NUM_NODES; i++) {
         int connectionIndex = getConnectionIndex(nodeId, i);
@@ -240,9 +235,9 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     if (connectionIndex < 0) return;
     if (cons[connectionIndex] == nullptr) {
         cons[connectionIndex].reset(new CPGConnection{ to, from, conParams.getChild(connectionIndex)});
-        conParams.getChild(connectionIndex).setProperty("active", true, nullptr);
-        conParams.getChild(connectionIndex).setProperty("from", from->getNodeNumber(), nullptr);
-        conParams.getChild(connectionIndex).setProperty("to", to->getNodeNumber(), nullptr);
+        conParams.getChild(connectionIndex).setProperty(Ids::active, true, nullptr);
+        conParams.getChild(connectionIndex).setProperty(Ids::from, from->getNodeNumber(), nullptr);
+        conParams.getChild(connectionIndex).setProperty(Ids::to, to->getNodeNumber(), nullptr);
         connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), "weight");
         cons[connectionIndex]->recalculatePath();
     }
@@ -252,10 +247,10 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
 void MainComponent::deleteConnection(int conId)
 {
     cons[conId].reset();
-    conParams.getChild(conId).setProperty("active", false, nullptr);
-    conParams.getChild(conId).setProperty("weight", 0.0, nullptr);
-    conParams.getChild(conId).setProperty("lengthMod", 0.0, nullptr);
-    conParams.getChild(conId).setProperty("startMod", 0.0, nullptr);
+    conParams.getChild(conId).setProperty(Ids::active, false, nullptr);
+    conParams.getChild(conId).setProperty(Ids::weight, 0.0, nullptr);
+    conParams.getChild(conId).setProperty(Ids::lengthMod, 0.0, nullptr);
+    conParams.getChild(conId).setProperty(Ids::startMod, 0.0, nullptr);
     clickedCon = -1;
     repaint();
 }
@@ -263,35 +258,35 @@ void MainComponent::deleteConnection(int conId)
 ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {
     return ValueTree{ "node" + String{nodeId} }
-        .setProperty("active", false, nullptr)
-        .setProperty("x", 0.0, nullptr)
-        .setProperty("y", 0.0, nullptr)
-        .setProperty("grainLength", 200.0, nullptr)
-        .setProperty("startTime", 0.0, nullptr)
-        .setProperty("frequency", 1.0, nullptr)
-        .setProperty("colour", colours[nodeId], nullptr);       
+        .setProperty(Ids::active, false, nullptr)
+        .setProperty(Ids::x, 0.0, nullptr)
+        .setProperty(Ids::y, 0.0, nullptr)
+        .setProperty(Ids::grainLength, 200.0, nullptr)
+        .setProperty(Ids::startTime, 0.0, nullptr)
+        .setProperty(Ids::frequency, 1.0, nullptr)
+        .setProperty(Ids::colour, colours[nodeId], nullptr);       
 }
 
 ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
 {
     return ValueTree{ "con" + String{connectionIndex } }
-        .setProperty("active", false, nullptr)
-        .setProperty("from", 0, nullptr)
-        .setProperty("to", 0, nullptr)
-        .setProperty("weight", 1.0, nullptr)
-        .setProperty("weightDir", 0.0, nullptr)
-        .setProperty("lengthMod", 0.0, nullptr)
-        .setProperty("lengthModDir", 0.0, nullptr)
-        .setProperty("startMod", 0.0, nullptr)
-        .setProperty("startModDir", 0.0, nullptr);
+        .setProperty(Ids::active, false, nullptr)
+        .setProperty(Ids::from, 0, nullptr)
+        .setProperty(Ids::to, 0, nullptr)
+        .setProperty(Ids::weight, 1.0, nullptr)
+        .setProperty(Ids::weightDir, 0.0, nullptr)
+        .setProperty(Ids::lengthMod, 0.0, nullptr)
+        .setProperty(Ids::lengthModDir, 0.0, nullptr)
+        .setProperty(Ids::startMod, 0.0, nullptr)
+        .setProperty(Ids::startModDir, 0.0, nullptr);
 }
 
 ValueTree MainComponent::makeMixerValueTree(int nodeId)
 {
     return ValueTree{ "nodeMix" + String{nodeId}  }
-        .setProperty("pan", 0.5f, nullptr)
-        .setProperty("volume", 0.7, nullptr)
-        .setProperty("colour", colours[nodeId], nullptr);
+        .setProperty(Ids::pan, 0.5f, nullptr)
+        .setProperty(Ids::volume, 0.7, nullptr)
+        .setProperty(Ids::colour, colours[nodeId], nullptr);
 }
 
 int MainComponent::getConnectionIndex(int from, int to)
@@ -339,18 +334,18 @@ void MainComponent::loadPreset(String fileName)
         conParams.copyPropertiesAndChildrenFrom(newTree.getChild(1), nullptr);
         mixerParams.copyPropertiesAndChildrenFrom(newTree.getChild(2), nullptr);
         for (int i = 0; i < NUM_NODES; i++) {
-            if (nodeParams.getChild(i).getProperty("active")) {
+            if (nodeParams.getChild(i).getProperty(Ids::active)) {
                 deleteNode(i);
-                makeNode(nodeParams.getChild(i).getProperty("x"), nodeParams.getChild(i).getProperty("y"));
+                makeNode(nodeParams.getChild(i).getProperty(Ids::x), nodeParams.getChild(i).getProperty(Ids::y));
             }
             else {
                 deleteNode(i);
             }
         }
         for (int i = 0; i < NUM_CONNECTIONS; i++) {
-            if (conParams.getChild(i).getProperty("active")) {
-                makeConnection(nodes[conParams.getChild(i).getProperty("from")].get(),
-                    nodes[conParams.getChild(i).getProperty("to")].get());
+            if (conParams.getChild(i).getProperty(Ids::active)) {
+                makeConnection(nodes[conParams.getChild(i).getProperty(Ids::from)].get(),
+                    nodes[conParams.getChild(i).getProperty(Ids::to)].get());
             }
         }
     }
@@ -360,19 +355,14 @@ void MainComponent::loadPreset(String fileName)
 void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
     CPGNode* node = dynamic_cast <CPGNode*> (&movedComp);
     if (node == 0) return;
-    nodeParams.getChild(node->getNodeNumber()).setProperty("x", node->getX(), nullptr);
-    nodeParams.getChild(node->getNodeNumber()).setProperty("y", node->getY(), nullptr);
+    nodeParams.getChild(node->getNodeNumber()).setProperty(Ids::x, node->getX(), nullptr);
+    nodeParams.getChild(node->getNodeNumber()).setProperty(Ids::y, node->getY(), nullptr);
     int nodeNumber = node->getNodeNumber();
     for (int i{ 0 }; i < NUM_NODES; i++) {
         int connectionIndex = getConnectionIndex(nodeNumber, i);
         if (nodeNumber != i && cons[connectionIndex] != nullptr) {
             cons[connectionIndex]->recalculatePath();
-            connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), "weight");
-            /*double weight = conParams.getChild(connectionIndex).getProperty("weight");
-            double dir = conParams.getChild(connectionIndex).getProperty("weightDir");
-
-            connectionChangeListener->sendWeight(cons[connectionIndex]->getParentNumber(), cons[connectionIndex]->getConnectedNumber(), weight * dir);
-            connectionChangeListener->sendWeight(cons[connectionIndex]->getConnectedNumber(), cons[connectionIndex]->getParentNumber(), weight * (1 - dir));*/
+            connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), Ids::weight);
         }
     }
     repaint();
@@ -382,9 +372,3 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     setter->setFile(samplePanel.getFileName());
 }
-
-/*void MainComponent::filenameComponentChanged(FilenameComponent* fileComponentThatHasChanged) 
-{
-    setter->setFile(fileComp->getCurrentFile().getFullPathName());
-    //samplePanel.shouldShowWaveform(true);
-}*/

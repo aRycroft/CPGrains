@@ -11,6 +11,7 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ParamSetter.h"
+#include "Identifiers.h"
 class NodeChangeListener : public ValueTree::Listener {
 public:
     NodeChangeListener(ValueTree params, ParamSetter* paramSetter) :
@@ -19,7 +20,7 @@ public:
         setter = paramSetter;
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
-        if (property == grainLength || property == startTime || property == frequency || property == pan || property == volume) {
+        if (property == Ids::grainLength || property == Ids::startTime || property == Ids::frequency || property == Ids::pan || property == Ids::volume) {
             int nodeID = vTree.getType().toString().getLastCharacter() - '0';
             setter->setParam(property.toString(), nodeID, vTree.getProperty(property));
         }
@@ -27,9 +28,4 @@ public:
 private:
     ValueTree tree;
     ParamSetter *setter;
-    Identifier grainLength{ "grainLength" };
-    Identifier startTime{ "startTime" };
-    Identifier frequency{ "frequency" };
-    Identifier pan{ "pan" };
-    Identifier volume{ "volume" };
 };

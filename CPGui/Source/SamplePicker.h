@@ -10,6 +10,7 @@
 
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Identifiers.h"
 
 struct SamplePicker : public Component,
                       public ChangeListener,
@@ -45,12 +46,12 @@ struct SamplePicker : public Component,
                 1.0f);
             for (int i{ 0 }; i < params.getNumChildren(); i++) {
                 ValueTree child = params.getChild(i);
-                if (child.getProperty("active")) {
-                    g.setColour(juce::Colour::fromString(child.getProperty("colour").toString()));
+                if (child.getProperty(Ids::active)) {
+                    g.setColour(juce::Colour::fromString(child.getProperty(Ids::colour).toString()));
                     g.setOpacity(0.6);
-                    float positionInWaveform = (float)child.getProperty("startTime") * getWidth();
+                    float positionInWaveform = (float)child.getProperty(Ids::startTime) * getWidth();
                     juce::Line<float> line{ positionInWaveform, 0, positionInWaveform, (float)getHeight() };
-                    double length = (double)child.getProperty("grainLength") * getWidth() / (waveform.getTotalLength() * 1000.0);
+                    double length = (double)child.getProperty(Ids::grainLength) * getWidth() / (waveform.getTotalLength() * 1000.0);
                     length = juce::jmax(length, 3.0);
                     g.drawLine(line, length);
                 }
@@ -93,10 +94,6 @@ struct SamplePicker : public Component,
 
     String getFileName() {
         return chooser->getResult().getFullPathName();
-    }
-
-    void setParams(ValueTree newParams) {
-        params.copyPropertiesAndChildrenFrom(newParams, nullptr);
     }
 
 private:

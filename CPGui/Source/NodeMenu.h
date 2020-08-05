@@ -10,6 +10,7 @@
 
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Identifiers.h"
 class NodeMenu : public PopupMenu {
 public:
     NodeMenu(ValueTree params, int* clickedNode) :
@@ -20,18 +21,17 @@ public:
     }
 
     int showMenu() {
-        DBG(nodeParams.toXmlString());
-        size.setValue(nodeParams.getChild(*clickedNode).getProperty("grainLength"), dontSendNotification);
-        pos.setValue(nodeParams.getChild(*clickedNode).getProperty("startTime"), dontSendNotification);
-        frequency.setValue(nodeParams.getChild(*clickedNode).getProperty("frequency"), dontSendNotification);
+        size.setValue(nodeParams.getChild(*clickedNode).getProperty(Ids::grainLength), dontSendNotification);
+        pos.setValue(nodeParams.getChild(*clickedNode).getProperty(Ids::startTime), dontSendNotification);
+        frequency.setValue(nodeParams.getChild(*clickedNode).getProperty(Ids::frequency), dontSendNotification);
         size.onValueChange = [this] {
-            nodeParams.getChild(*clickedNode).setProperty("grainLength", size.getValue(), nullptr);
+            nodeParams.getChild(*clickedNode).setProperty(Ids::grainLength, size.getValue(), nullptr);
         };
         pos.onValueChange = [this] {
-            nodeParams.getChild(*clickedNode).setProperty("startTime", pos.getValue(), nullptr);
+            nodeParams.getChild(*clickedNode).setProperty(Ids::startTime, pos.getValue(), nullptr);
         };
         frequency.onValueChange = [this] {
-            nodeParams.getChild(*clickedNode).setProperty("frequency", frequency.getValue(), nullptr);
+            nodeParams.getChild(*clickedNode).setProperty(Ids::frequency, frequency.getValue(), nullptr);
         };
         const int result = this->show();
         return result;

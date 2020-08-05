@@ -44,8 +44,8 @@ Identifier CPGConnection::getId()
 
 void CPGConnection::recalculatePath()
 {
-    double weight = params.getProperty("weight");
-    double direction = params.getProperty("weightDir");
+    double weight = params.getProperty(Ids::weight);
+    double direction = params.getProperty(Ids::weightDir);
     double fWeight = weight * (1 - direction);
     weight *= direction;
     /*Probably nicer way to do this, this seems inefficient*/
@@ -63,24 +63,6 @@ void CPGConnection::recalculatePath()
     path.addLineSegment(betweenPoints.toFloat(), 7.0f);
     path.addArrow(Line<int>{lineStart, parentEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
     path.addArrow(Line<int>{lineEnd, connectedEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
-
-
-    /*
-    weight = params.getPropertyAsValue("lengthMod", nullptr).getValue();
-    direction = params.getPropertyAsValue("lengthModDir", nullptr).getValue();
-    fWeight = weight * (1 - direction);
-    weight *= direction;
-    
-    bandPath.clear();
-    double distanceFromLineStart = jmin(20.0 / betweenPoints.getLength(), (double)betweenPoints.getLength() / 2);
-    juce::Point<int> bandPoint = lineStart + (lineEnd - lineStart) * distanceFromLineStart;
-    juce::Line<int> band1 {lineStart, bandPoint};
-    band1.applyTransform(AffineTransform::rotation(MathConstants<float>::halfPi, bandPoint.getX(), bandPoint.getY()));
-    bandPath.addLineSegment(band1.toFloat(), 5.0f);
-    juce::Line<int> band2{ lineStart, bandPoint };
-    band2.applyTransform(AffineTransform::rotation(MathConstants<float>::halfPi, bandPoint.getX(), bandPoint.getY()));
-    bandPath.addLineSegment(band2.toFloat(), 5.0f);
-    */
 }
 
 Path* CPGConnection::getPath()
@@ -91,18 +73,6 @@ Path* CPGConnection::getPath()
 Path* CPGConnection::getParameterPathBands() {
     return &bandPath;
 }
-
-float CPGConnection::calculateWeight(double mult)
-{
-    juce::Point<int> pos1 = CPGConnection::getCentre(parent);
-    juce::Point<int> pos2 = CPGConnection::getCentre(connectedTo);
-
-    float radius = parent->getBounds().getWidth() / 2;
-    float weight = sqrt(pow(pos2.getX() - pos1.getX(), 2) + pow(pos2.getY() - pos1.getY(), 2) * 1.0f) - radius * 2;
-    int strength = 200 * mult;
-    return std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f);
-}
-
 
 bool CPGConnection::containsPoint(Point<float> point)
 {

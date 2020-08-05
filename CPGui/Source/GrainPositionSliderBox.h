@@ -10,6 +10,7 @@
 
 #pragma once
 #include "JuceHeader.h"
+#include "Identifiers.h"
 
 class GrainPositionSliderBox : public Component, public ValueTree::Listener {
 public:
@@ -34,11 +35,11 @@ public:
         constrainer.checkBounds(bounds, getBoundsInParent(), Rectangle<int>{getParentWidth(), getHeight()},
             false, false, false, false);
         setBounds(bounds);
-        nodeTree.setProperty("startTime", (double)getX() / (double)getParentWidth(), nullptr);
+        nodeTree.setProperty(Ids::startTime, (double)getX() / (double)getParentWidth(), nullptr);
         DBG(nodeTree.toXmlString());
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
-        if (property == startTime) {
+        if (property == Ids::startTime) {
             setTopLeftPosition(juce::Point<double>{(double)getParentWidth() * (double)vTree.getProperty(property), 0}.toInt());
         }
     };
@@ -47,13 +48,4 @@ private:
     ComponentDragger dragger;
     juce::Colour colour;
     juce::ValueTree nodeTree;
-    Identifier startTime{ "startTime" };
 };
-
-/*class HorizontalBoundsConstrainer : public ComponentBoundsConstrainer {
-public:
-    void checkBounds() override {
-
-
-    };
-};*/

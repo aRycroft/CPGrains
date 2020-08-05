@@ -10,31 +10,35 @@
 
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
-class ConnectionMenu : public PopupMenu {
+#include "Identifiers.h"
+
+class ConnectionMenu : public PopupMenu 
+{
 public:
-    ConnectionMenu(ValueTree params, int* clickedCon, Component* parent):
-        conParams(params)
+    ConnectionMenu(ValueTree params, int* clickedCon, Component* parent)
+        :conParams(params)
     {
         this->clickedCon = clickedCon;
         this->parent = parent;
         setUpConnectionMenu();
     }
 
-    int showMenu() {
+    int showMenu() 
+    {
         if (weightButton.getToggleState()) {
-            changeMenuSliders("weight", "weightDir", 0.0, 10.0);
+            changeMenuSliders(Ids::weight, Ids::weightDir, 0.0, 10.0);
         }
         else if (lengthButton.getToggleState()) {
-            changeMenuSliders("lengthMod", "lengthModDir", 0.0, 2000.0);
+            changeMenuSliders(Ids::lengthMod, Ids::lengthModDir, 0.0, 2000.0);
         }
         else {
-            changeMenuSliders("startMod", "startModDir", 0.0, 5000.0);
+            changeMenuSliders(Ids::startMod, Ids::startModDir, 0.0, 5000.0);
         }
         const int result = this->show();
         return result;
     }
 
-    void changeMenuSliders(String weight, String direction, double startValue, double endValue)
+    void changeMenuSliders(juce::Identifier weight, Identifier direction, double startValue, double endValue)
     {
         weightSlider.setNormalisableRange(NormalisableRange<double>(startValue, endValue, 0.01, 1.0));
         weightSlider.setValue(conParams.getChild(*clickedCon).getProperty(weight), dontSendNotification);
@@ -53,6 +57,7 @@ public:
     void setParams(ValueTree newParams) {
         conParams.copyPropertiesAndChildrenFrom(newParams, nullptr);
     }
+
 private:
     void setUpConnectionMenu()
     {
@@ -71,19 +76,19 @@ private:
             lengthButton.setToggleState(false, dontSendNotification);
             positionButton.setToggleState(false, dontSendNotification);
             weightButton.setToggleState(true, dontSendNotification);
-            changeMenuSliders("weight", "weightDir", 0.0, 10.0);
+            changeMenuSliders(Ids::weight, Ids::weightDir, 0.0, 10.0);
         };
         lengthButton.onClick = [this] {
             weightButton.setToggleState(false, dontSendNotification);
             positionButton.setToggleState(false, dontSendNotification);
             lengthButton.setToggleState(true, dontSendNotification);
-            changeMenuSliders("lengthMod", "lengthModDir", 0.0, 2000.0);
+            changeMenuSliders(Ids::lengthMod, Ids::lengthModDir, 0.0, 2000.0);
         };
         positionButton.onClick = [this] {
             weightButton.setToggleState(false, dontSendNotification);
             lengthButton.setToggleState(false, dontSendNotification);
             positionButton.setToggleState(true, dontSendNotification);
-            changeMenuSliders("startMod", "startModDir", 0.0, 5000.0);
+            changeMenuSliders(Ids::startMod, Ids::startModDir, 0.0, 5000.0);
         };
         weightButton.setToggleState(true, dontSendNotification);
         weightBLabel.setText("CPG Connection", dontSendNotification);
@@ -95,8 +100,9 @@ private:
         posBLabel.setText("Grain Position Modifier (Multiplied by CPG signal)", dontSendNotification);
         this->addCustomItem(-1, posBLabel, 50, height, false);
         this->addCustomItem(-1, positionButton, 50, height, false);
-        changeMenuSliders("weight", "weightDir", 0.0, 10.0);
+        changeMenuSliders(Ids::weight, Ids::weightDir, 0.0, 10.0);
     }
+
     Slider weightSlider, directionSlider;
     ToggleButton weightButton, lengthButton, positionButton;
     Label weightLabel, directionLabel, weightBLabel, lengthBLabel, posBLabel;

@@ -2,6 +2,8 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
+    <FILE id="Hrr3dG" name="Identifiers.cpp" compile="1" resource="0" file="Source/Identifiers.cpp"/>
+    <FILE id="Mwi5JU" name="Identifiers.h" compile="0" resource="0" file="Source/Identifiers.h"/>
     <FILE id="nhJm67" name="MixerMenu.h" compile="0" resource="0" file="Source/MixerMenu.h"/>
     <FILE id="cAGjbQ" name="MixerChangeListener.h" compile="0" resource="0"
           file="Source/MixerChangeListener.h"/>

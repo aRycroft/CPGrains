@@ -21,6 +21,8 @@
 #include "NodeMenu.h"
 #include "SamplePicker.h"
 #include "MixerMenu.h"
+#include "Identifiers.h"
+
 
 #define NUM_NODES 4
 #define NUM_CONNECTIONS (NUM_NODES * (NUM_NODES - 1)) / 2
@@ -34,7 +36,6 @@
 class MainComponent   : public Component,
                         public ComponentListener,
                         public Button::Listener,
-                        public Slider::Listener,
                         public ValueTree::Listener,
                         public ChangeListener
 {
@@ -49,7 +50,6 @@ public:
     void mouseDown(const MouseEvent& e) override;
     void mouseDoubleClick(const MouseEvent& event) override;
     void buttonClicked(Button* button) override;
-    void sliderValueChanged(Slider* slider) override;
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 private:

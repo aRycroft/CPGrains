@@ -11,6 +11,7 @@
 #pragma once
 #include "JuceHeader.h"
 #include "CPGNode.h"
+#include "Identifiers.h"
 
 class CPGConnection 
 {
@@ -21,11 +22,9 @@ public:
     CPGNode* getParent();
     int getParentNumber();
     Identifier getId();
-    int weight = 0;
     void recalculatePath();
     Path* getPath();
     Path* getParameterPathBands();
-    float calculateWeight(double mult);
     bool containsPoint(Point<float> p);
 private:
     static Point<int> getCentre(Component* comp);

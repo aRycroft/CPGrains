@@ -24,6 +24,5 @@ public:
     };
 private:
     ValueTree tree;
-    ParamSetter* setter;
-    
+    ParamSetter* setter; 
 };
