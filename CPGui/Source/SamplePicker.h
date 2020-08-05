@@ -56,8 +56,8 @@ struct SamplePicker : public Component,
                 }
             }
         }
-        
     }
+
     void resized() override
     {
         openButton.setBounds(0, 0, getWidth(), getHeight());
@@ -93,6 +93,10 @@ struct SamplePicker : public Component,
 
     String getFileName() {
         return chooser->getResult().getFullPathName();
+    }
+
+    void setParams(ValueTree newParams) {
+        params.copyPropertiesAndChildrenFrom(newParams, nullptr);
     }
 
 private:

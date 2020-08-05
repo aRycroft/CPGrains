@@ -44,8 +44,8 @@ Identifier CPGConnection::getId()
 
 void CPGConnection::recalculatePath()
 {
-    double weight = params.getPropertyAsValue("weight", nullptr).getValue();
-    double direction = params.getPropertyAsValue("weightDir", nullptr).getValue();
+    double weight = params.getProperty("weight");
+    double direction = params.getProperty("weightDir");
     double fWeight = weight * (1 - direction);
     weight *= direction;
     /*Probably nicer way to do this, this seems inefficient*/

@@ -20,6 +20,7 @@ public:
     }
 
     int showMenu() {
+        DBG(nodeParams.toXmlString());
         size.setValue(nodeParams.getChild(*clickedNode).getProperty("grainLength"), dontSendNotification);
         pos.setValue(nodeParams.getChild(*clickedNode).getProperty("startTime"), dontSendNotification);
         frequency.setValue(nodeParams.getChild(*clickedNode).getProperty("frequency"), dontSendNotification);
@@ -34,6 +35,10 @@ public:
         };
         const int result = this->show();
         return result;
+    }
+
+    void setParams(ValueTree newParams) {
+        nodeParams.copyPropertiesAndChildrenFrom(newParams, nullptr);
     }
 
 private:

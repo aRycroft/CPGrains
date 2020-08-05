@@ -19,7 +19,8 @@ public:
         setter = paramSetter;
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
-        setter->setParam(property.toString(), vTree.getType().toString().getIntValue(), vTree.getProperty(property));
+        int nodeID =  vTree.getType().toString().getLastCharacter() - '0';
+        setter->setParam(property.toString(), nodeID, vTree.getProperty(property));
     };
 private:
     ValueTree tree;

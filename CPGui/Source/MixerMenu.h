@@ -10,7 +10,7 @@
 
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
-class MixerMenu :public Component {
+class MixerMenu : public Component {
 public:
     MixerMenu(ValueTree mixerParams)
         : mixerParams(mixerParams)
@@ -63,6 +63,15 @@ public:
         grid.templateColumns = tracks;
         grid.items = items;
         grid.performLayout(getLocalBounds());
+    }
+
+    void setParams(ValueTree params) 
+    {
+        mixerParams.copyPropertiesAndChildrenFrom(params, nullptr);
+        for (int i = 0; i < mixerParams.getNumChildren(); i++) {
+            sliders[i]->setValue(mixerParams.getChild(i).getProperty(volume), dontSendNotification);
+            sliders[i + 1]->setValue(mixerParams.getChild(i + 1).getProperty(pan), dontSendNotification);
+        }
     }
 private:
     OwnedArray<Slider> sliders;

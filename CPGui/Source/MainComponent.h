@@ -61,10 +61,13 @@ private:
     ValueTree makeConnectionValueTree(int connectionIndex);
     ValueTree makeMixerValueTree(int nodeId);
     int getConnectionIndex(int from, int to);
+    void sendStateToDSP();
+    void savePreset(String fileName);
+    void loadPreset(String fileName);
 
     CPGLookAndFeel LandF;
     Component nodePanel;
-    TextButton addNodeButton, toggleMixer;
+    TextButton addNodeButton, toggleMixer, addPreset;
     ToggleButton DSPButton;
     Slider mainFreqSlider;
     std::unique_ptr<FilenameComponent> fileComp;

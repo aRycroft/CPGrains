@@ -20,7 +20,8 @@ public:
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
         if (property == grainLength || property == startTime || property == frequency || property == pan || property == volume) {
-            setter->setParam(property.toString(), vTree.getType().toString().getIntValue(), vTree.getProperty(property));
+            int nodeID = vTree.getType().toString().getLastCharacter() - '0';
+            setter->setParam(property.toString(), nodeID, vTree.getProperty(property));
         }
     };
 private:

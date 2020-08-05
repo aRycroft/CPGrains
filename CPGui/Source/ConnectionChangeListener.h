@@ -56,7 +56,7 @@ public:
 
         float weight = sqrt(pow(pos2.getX() - pos1.getX(), 2) + pow(pos2.getY() - pos1.getY(), 2) * 1.0f) - radius * 2;
         int strength = 200 * mult;
-        setter->setWeight(from, to, std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f));
+        setter->setWeight(to, from, std::max<float>(1 + (-1 * (weight - 0) / strength), 0.0f));
     }
 private:
     juce::Point<int> getCentre(juce::Point<int> comp, int radius)

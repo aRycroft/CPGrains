@@ -37,7 +37,6 @@ MainComponent::MainComponent()
 
     nodeParams.addListener(nodeChangeListener.get());
     conParams.addListener(connectionChangeListener.get());
-    //nodeParams.addListener(mixerChangeListener.get());
     mixerParams.addListener(mixerChangeListener.get());
 
     for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
@@ -69,7 +68,10 @@ MainComponent::MainComponent()
     toggleMixerLabel.setText("Toggle Mixer", dontSendNotification);
     toggleMixerLabel.attachToComponent(&toggleMixer, true);
     addAndMakeVisible(&toggleMixerLabel);
+    addPreset.addListener(this);
+    addAndMakeVisible(&addPreset);
     setSize (1000, 600);
+    loadPreset("test");
     //makeNode(100, 200);
     //makeNode(400, 200);
    // makeConnection(nodes[0].get(), nodes[1].get());
@@ -100,16 +102,18 @@ void MainComponent::resized()
     addNodeButton.setBounds(width - 100, 25, 50, 50);
     DSPButton.setBounds(width - 100, 100, 50, 50);
     toggleMixer.setBounds(width - 100, 150, 50, 50);
+    addPreset.setBounds(width - 100, 200, 50, 50);
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
-        if (nodeParams.getChild(i).getProperty("active")) {
-            CPGNode* test = nodes[i].get();
+        CPGNode* test = nodes[i].get();
+        if (test != nullptr) {
             test->setBounds(std::min(test->getParentWidth() - NODESIZE, test->getX()),
                 std::min(test->getParentHeight() - NODESIZE, test->getY()),
                 NODESIZE, NODESIZE);
             Component* sliderBox = test->getSliderBox();
             sliderBox->setBounds(sliderBox->getX(), sliderBox->getY(), sliderBox->getParentHeight() / 4, sliderBox->getParentHeight() / 4);
         }
+       
     }
     Grid grid;
 
@@ -172,6 +176,7 @@ void MainComponent::buttonClicked(Button* button)
     else if (button == &DSPButton) {
         DSPOn = !DSPOn;
         setter->setDSPState(DSPOn);
+        if(DSPOn) sendStateToDSP();
     }
     else if (button == &toggleMixer) {
         if (mixerShowing) {
@@ -185,6 +190,9 @@ void MainComponent::buttonClicked(Button* button)
         mixerShowing = !mixerShowing;
         resized();
     }
+    else if (button == &addPreset) {
+        savePreset("test");
+    }
 }
 
 void MainComponent::sliderValueChanged(Slider* slider)
@@ -194,9 +202,14 @@ void MainComponent::sliderValueChanged(Slider* slider)
 
 void MainComponent::makeNode(int x, int y)
 {
-    if (availableNodes.empty()) return;
-    int nodeId = availableNodes.top();
-    availableNodes.pop();
+    int nodeId = -1;
+    for (int i = 0; i < NUM_NODES; i++) {
+        if (nodes[i].get() == nullptr) {
+            nodeId = i;
+            break;
+        }
+    }
+    if (nodeId == -1) return;
     nodes[nodeId].reset(new CPGNode(nodeId, x, y, nodeParams.getChild(nodeId), juce::Colour::fromString(colours[nodeId])));
     nodes[nodeId]->addComponentListener(this);
     nodes[nodeId]->addMouseListener(this ,false);
@@ -227,10 +240,10 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
     if (connectionIndex < 0) return;
     if (cons[connectionIndex] == nullptr) {
         cons[connectionIndex].reset(new CPGConnection{ to, from, conParams.getChild(connectionIndex)});
-        connectionChangeListener->sendWeight(from->getNodeNumber(), to->getNodeNumber(), 1.0);
         conParams.getChild(connectionIndex).setProperty("active", true, nullptr);
         conParams.getChild(connectionIndex).setProperty("from", from->getNodeNumber(), nullptr);
         conParams.getChild(connectionIndex).setProperty("to", to->getNodeNumber(), nullptr);
+        connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), "weight");
         cons[connectionIndex]->recalculatePath();
     }
     repaint(); 
@@ -249,7 +262,7 @@ void MainComponent::deleteConnection(int conId)
 
 ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {
-    return ValueTree{ Identifier{String{nodeId} } }
+    return ValueTree{ "node" + String{nodeId} }
         .setProperty("active", false, nullptr)
         .setProperty("x", 0.0, nullptr)
         .setProperty("y", 0.0, nullptr)
@@ -261,7 +274,7 @@ ValueTree MainComponent::makeNodeValueTree(int nodeId)
 
 ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
 {
-    return ValueTree{ Identifier{String{connectionIndex} } }
+    return ValueTree{ "con" + String{connectionIndex } }
         .setProperty("active", false, nullptr)
         .setProperty("from", 0, nullptr)
         .setProperty("to", 0, nullptr)
@@ -275,7 +288,7 @@ ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
 
 ValueTree MainComponent::makeMixerValueTree(int nodeId)
 {
-    return ValueTree{ Identifier{String{nodeId} } }
+    return ValueTree{ "nodeMix" + String{nodeId}  }
         .setProperty("pan", 0.5f, nullptr)
         .setProperty("volume", 0.7, nullptr)
         .setProperty("colour", colours[nodeId], nullptr);
@@ -294,6 +307,55 @@ int MainComponent::getConnectionIndex(int from, int to)
     return connectionIndex;
 }
 
+void MainComponent::sendStateToDSP()
+{
+    for (auto param : paramTree) {
+        for (auto child : param) {
+            for (int i = 0; i < child.getNumProperties(); i++) {
+                child.sendPropertyChangeMessage(child.getPropertyName(i));
+            }
+        }
+    }
+}
+
+void MainComponent::savePreset(String fileName)
+{
+    //File fileLocation{ "C:\\Users\\Alex\\Documents\\MProj\\CPGrains\\CPGui\\Builds\\VisualStudio2019\\x64\\Debug\\App\\test.txt" };
+    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
+        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml"};
+    paramTree.createXml()->writeTo(fileLocation);
+}
+
+void MainComponent::loadPreset(String fileName)
+{
+    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
+        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml" };
+    if (fileLocation.existsAsFile()) {
+        XmlDocument xml{ fileLocation };
+        auto xmlElement = xml.getDocumentElement();
+        ValueTree newTree = paramTree.fromXml(xmlElement->toString());
+        //paramTree.copyPropertiesAndChildrenFrom(newTree, nullptr);
+        nodeParams.copyPropertiesAndChildrenFrom(newTree.getChild(0), nullptr);
+        conParams.copyPropertiesAndChildrenFrom(newTree.getChild(1), nullptr);
+        mixerParams.copyPropertiesAndChildrenFrom(newTree.getChild(2), nullptr);
+        for (int i = 0; i < NUM_NODES; i++) {
+            if (nodeParams.getChild(i).getProperty("active")) {
+                deleteNode(i);
+                makeNode(nodeParams.getChild(i).getProperty("x"), nodeParams.getChild(i).getProperty("y"));
+            }
+            else {
+                deleteNode(i);
+            }
+        }
+        for (int i = 0; i < NUM_CONNECTIONS; i++) {
+            if (conParams.getChild(i).getProperty("active")) {
+                makeConnection(nodes[conParams.getChild(i).getProperty("from")].get(),
+                    nodes[conParams.getChild(i).getProperty("to")].get());
+            }
+        }
+    }
+    sendStateToDSP();
+}
 
 void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
     CPGNode* node = dynamic_cast <CPGNode*> (&movedComp);
@@ -305,10 +367,12 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
         int connectionIndex = getConnectionIndex(nodeNumber, i);
         if (nodeNumber != i && cons[connectionIndex] != nullptr) {
             cons[connectionIndex]->recalculatePath();
-            double weight = conParams.getChild(connectionIndex).getPropertyAsValue("weight", nullptr).getValue();
-            double dir = conParams.getChild(connectionIndex).getPropertyAsValue("weightDir", nullptr).getValue();
+            connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), "weight");
+            /*double weight = conParams.getChild(connectionIndex).getProperty("weight");
+            double dir = conParams.getChild(connectionIndex).getProperty("weightDir");
+
             connectionChangeListener->sendWeight(cons[connectionIndex]->getParentNumber(), cons[connectionIndex]->getConnectedNumber(), weight * dir);
-            connectionChangeListener->sendWeight(cons[connectionIndex]->getConnectedNumber(), cons[connectionIndex]->getParentNumber(), weight * (1 - dir));
+            connectionChangeListener->sendWeight(cons[connectionIndex]->getConnectedNumber(), cons[connectionIndex]->getParentNumber(), weight * (1 - dir));*/
         }
     }
     repaint();

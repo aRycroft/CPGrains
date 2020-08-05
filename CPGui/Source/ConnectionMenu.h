@@ -49,6 +49,10 @@ public:
         };
      
     }
+
+    void setParams(ValueTree newParams) {
+        conParams.copyPropertiesAndChildrenFrom(newParams, nullptr);
+    }
 private:
     void setUpConnectionMenu()
     {
