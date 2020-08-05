@@ -15,10 +15,9 @@ MainComponent::MainComponent()
     setter{ new OSCParamSetter(8000) },
     nodeChangeListener{ new NodeChangeListener{ paramTree, setter.get()} },
     connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
-    mixerChangeListener{ new MixerChangeListener{ paramTree, setter.get()} },
-    conMenu(conParams, &clickedCon, this),
-    nodeMenu(nodeParams, &clickedNode)
+    mixerChangeListener{ new MixerChangeListener{ paramTree, setter.get()} }
 {
+
     paramTree.addChild(nodeParams, 0, nullptr);
     paramTree.addChild(conParams, 1, nullptr);
     paramTree.addChild(mixerParams, 2, nullptr);
@@ -27,23 +26,21 @@ MainComponent::MainComponent()
         nodeParams.addChild(makeNodeValueTree(i), i, nullptr);
         mixerParams.addChild(makeMixerValueTree(i), i, nullptr);
     }
- 
+    
+    mixerParams.setProperty(Ids::pan, 0.5, nullptr);
+    mixerParams.setProperty(Ids::volume, 1.0, nullptr);
+
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         conParams.addChild(makeConnectionValueTree(i), i, nullptr);
     }
 
-    mixerParams.setProperty(Ids::pan, 0.5, nullptr);
-    mixerParams.setProperty(Ids::volume, 1.0, nullptr);
+    conMenu.reset(new ConnectionMenu{ conParams, &clickedCon, this });
+    nodeMenu.reset(new NodeMenu{ nodeParams, &clickedNode });
+    mixerMenu.reset(new MixerMenu(mixerParams));
 
     nodeParams.addListener(nodeChangeListener.get());
     conParams.addListener(connectionChangeListener.get());
     mixerParams.addListener(mixerChangeListener.get());
-
-    for (int i{ NUM_NODES - 1 }; i >= 0; i--) {
-        availableNodes.push(i);
-    }
-
-    mixerMenu.reset(new MixerMenu(mixerParams));
 
     addAndMakeVisible(nodePanel);
     addAndMakeVisible(samplePanel);
@@ -72,9 +69,6 @@ MainComponent::MainComponent()
     addAndMakeVisible(&addPreset);
     setSize (1000, 600);
     loadPreset("test");
-    //makeNode(100, 200);
-    //makeNode(400, 200);
-   // makeConnection(nodes[0].get(), nodes[1].get());
 }
 
 MainComponent::~MainComponent()
@@ -149,7 +143,7 @@ void MainComponent::mouseDown(const MouseEvent& e)
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (cons[i] != nullptr && cons[i]->containsPoint(e.getMouseDownPosition().toFloat())) {
             clickedCon = i;
-            const int deleteConRequested = conMenu.showMenu();
+            const int deleteConRequested = conMenu->showMenu();
             if (deleteConRequested) {
                 deleteConnection(i);
             }
@@ -162,7 +156,7 @@ void MainComponent::mouseDoubleClick(const MouseEvent& e) {
     CPGNode* node = dynamic_cast <CPGNode*> (e.eventComponent);
     if (node == 0) return;
     clickedNode = node->getNodeNumber();
-    const int deleteNodeRequested = nodeMenu.showMenu();
+    const int deleteNodeRequested = nodeMenu->showMenu();
     if (deleteNodeRequested) {
         deleteNode(clickedNode);
     }
@@ -216,7 +210,6 @@ void MainComponent::makeNode(int x, int y)
 }
 
 void MainComponent::deleteNode(int nodeId) {
-    availableNodes.push(nodeId);
     nodeParams.getChild(nodeId).setProperty(Ids::active, false, nullptr);
     nodes[nodeId].reset();
     for (int i{ 0 }; i < NUM_NODES; i++) {
@@ -238,7 +231,7 @@ void MainComponent::makeConnection(CPGNode* from, CPGNode* to)
         conParams.getChild(connectionIndex).setProperty(Ids::active, true, nullptr);
         conParams.getChild(connectionIndex).setProperty(Ids::from, from->getNodeNumber(), nullptr);
         conParams.getChild(connectionIndex).setProperty(Ids::to, to->getNodeNumber(), nullptr);
-        connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), "weight");
+        connectionChangeListener->valueTreePropertyChanged(conParams.getChild(connectionIndex), Ids::weight);
         cons[connectionIndex]->recalculatePath();
     }
     repaint(); 
@@ -255,39 +248,7 @@ void MainComponent::deleteConnection(int conId)
     repaint();
 }
 
-ValueTree MainComponent::makeNodeValueTree(int nodeId)
-{
-    return ValueTree{ "node" + String{nodeId} }
-        .setProperty(Ids::active, false, nullptr)
-        .setProperty(Ids::x, 0.0, nullptr)
-        .setProperty(Ids::y, 0.0, nullptr)
-        .setProperty(Ids::grainLength, 200.0, nullptr)
-        .setProperty(Ids::startTime, 0.0, nullptr)
-        .setProperty(Ids::frequency, 1.0, nullptr)
-        .setProperty(Ids::colour, colours[nodeId], nullptr);       
-}
 
-ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
-{
-    return ValueTree{ "con" + String{connectionIndex } }
-        .setProperty(Ids::active, false, nullptr)
-        .setProperty(Ids::from, 0, nullptr)
-        .setProperty(Ids::to, 0, nullptr)
-        .setProperty(Ids::weight, 1.0, nullptr)
-        .setProperty(Ids::weightDir, 0.0, nullptr)
-        .setProperty(Ids::lengthMod, 0.0, nullptr)
-        .setProperty(Ids::lengthModDir, 0.0, nullptr)
-        .setProperty(Ids::startMod, 0.0, nullptr)
-        .setProperty(Ids::startModDir, 0.0, nullptr);
-}
-
-ValueTree MainComponent::makeMixerValueTree(int nodeId)
-{
-    return ValueTree{ "nodeMix" + String{nodeId}  }
-        .setProperty(Ids::pan, 0.5f, nullptr)
-        .setProperty(Ids::volume, 0.7, nullptr)
-        .setProperty(Ids::colour, colours[nodeId], nullptr);
-}
 
 int MainComponent::getConnectionIndex(int from, int to)
 {
@@ -302,57 +263,9 @@ int MainComponent::getConnectionIndex(int from, int to)
     return connectionIndex;
 }
 
-void MainComponent::sendStateToDSP()
-{
-    for (auto param : paramTree) {
-        for (auto child : param) {
-            for (int i = 0; i < child.getNumProperties(); i++) {
-                child.sendPropertyChangeMessage(child.getPropertyName(i));
-            }
-        }
-    }
-}
 
-void MainComponent::savePreset(String fileName)
+void MainComponent::componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized)
 {
-    //File fileLocation{ "C:\\Users\\Alex\\Documents\\MProj\\CPGrains\\CPGui\\Builds\\VisualStudio2019\\x64\\Debug\\App\\test.txt" };
-    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
-        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml"};
-    paramTree.createXml()->writeTo(fileLocation);
-}
-
-void MainComponent::loadPreset(String fileName)
-{
-    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
-        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml" };
-    if (fileLocation.existsAsFile()) {
-        XmlDocument xml{ fileLocation };
-        auto xmlElement = xml.getDocumentElement();
-        ValueTree newTree = paramTree.fromXml(xmlElement->toString());
-        //paramTree.copyPropertiesAndChildrenFrom(newTree, nullptr);
-        nodeParams.copyPropertiesAndChildrenFrom(newTree.getChild(0), nullptr);
-        conParams.copyPropertiesAndChildrenFrom(newTree.getChild(1), nullptr);
-        mixerParams.copyPropertiesAndChildrenFrom(newTree.getChild(2), nullptr);
-        for (int i = 0; i < NUM_NODES; i++) {
-            if (nodeParams.getChild(i).getProperty(Ids::active)) {
-                deleteNode(i);
-                makeNode(nodeParams.getChild(i).getProperty(Ids::x), nodeParams.getChild(i).getProperty(Ids::y));
-            }
-            else {
-                deleteNode(i);
-            }
-        }
-        for (int i = 0; i < NUM_CONNECTIONS; i++) {
-            if (conParams.getChild(i).getProperty(Ids::active)) {
-                makeConnection(nodes[conParams.getChild(i).getProperty(Ids::from)].get(),
-                    nodes[conParams.getChild(i).getProperty(Ids::to)].get());
-            }
-        }
-    }
-    sendStateToDSP();
-}
-
-void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved, bool wasResized) {
     CPGNode* node = dynamic_cast <CPGNode*> (&movedComp);
     if (node == 0) return;
     nodeParams.getChild(node->getNodeNumber()).setProperty(Ids::x, node->getX(), nullptr);
@@ -371,4 +284,94 @@ void MainComponent::componentMovedOrResized(Component &movedComp, bool wasMoved,
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     setter->setFile(samplePanel.getFileName());
+}
+
+void MainComponent::savePreset(String fileName)
+{
+    //File fileLocation{ "C:\\Users\\Alex\\Documents\\MProj\\CPGrains\\CPGui\\Builds\\VisualStudio2019\\x64\\Debug\\App\\test.txt" };
+    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
+        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml"};
+    paramTree.createXml()->writeTo(fileLocation);
+}
+
+void MainComponent::loadPreset(String fileName)
+{
+    resetState();
+    File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath).getParentDirectory().getFullPathName() 
+        + "\\" + fileName + ".xml" };
+    if (fileLocation.existsAsFile()) {
+        XmlDocument xml{ fileLocation };
+        auto xmlElement = xml.getDocumentElement();
+        ValueTree newTree = paramTree.fromXml(xmlElement->toString());
+        nodeParams.copyPropertiesAndChildrenFrom(newTree.getChild(0), nullptr);
+        conParams.copyPropertiesAndChildrenFrom(newTree.getChild(1), nullptr);
+        mixerParams.copyPropertiesAndChildrenFrom(newTree.getChild(2), nullptr);
+        for (int i = 0; i < NUM_NODES; i++) {
+            if (nodeParams.getChild(i).getProperty(Ids::active)) {
+                makeNode(nodeParams.getChild(i).getProperty(Ids::x), nodeParams.getChild(i).getProperty(Ids::y));
+            }
+        }
+        for (int i = 0; i < NUM_CONNECTIONS; i++) {
+            if (conParams.getChild(i).getProperty(Ids::active)) {
+                makeConnection(nodes[conParams.getChild(i).getProperty(Ids::from)].get(),
+                    nodes[conParams.getChild(i).getProperty(Ids::to)].get());
+            }
+        }
+    }
+    sendStateToDSP();
+}
+
+void MainComponent::resetState() 
+{
+    for (int i = 0; i < NUM_NODES; i++) {
+        deleteNode(i);
+    }
+    for (int i = 0; i < NUM_CONNECTIONS; i++) {
+        deleteConnection(i);
+    }
+}
+
+void MainComponent::sendStateToDSP()
+{
+    for (auto param : paramTree) {
+        for (auto child : param) {
+            for (int i = 0; i < child.getNumProperties(); i++) {
+                child.sendPropertyChangeMessage(child.getPropertyName(i));
+            }
+        }
+    }
+}
+
+ValueTree MainComponent::makeNodeValueTree(int nodeId)
+{
+    return ValueTree{ "node" + String{nodeId} }
+        .setProperty(Ids::active, false, nullptr)
+        .setProperty(Ids::x, 0.0, nullptr)
+        .setProperty(Ids::y, 0.0, nullptr)
+        .setProperty(Ids::grainLength, 200.0, nullptr)
+        .setProperty(Ids::startTime, 0.0, nullptr)
+        .setProperty(Ids::frequency, 1.0, nullptr)
+        .setProperty(Ids::colour, colours[nodeId], nullptr);
+}
+
+ValueTree MainComponent::makeConnectionValueTree(int connectionIndex)
+{
+    return ValueTree{ "con" + String{connectionIndex } }
+        .setProperty(Ids::active, false, nullptr)
+        .setProperty(Ids::from, 0, nullptr)
+        .setProperty(Ids::to, 0, nullptr)
+        .setProperty(Ids::weight, 1.0, nullptr)
+        .setProperty(Ids::weightDir, 0.0, nullptr)
+        .setProperty(Ids::lengthMod, 0.0, nullptr)
+        .setProperty(Ids::lengthModDir, 0.0, nullptr)
+        .setProperty(Ids::startMod, 0.0, nullptr)
+        .setProperty(Ids::startModDir, 0.0, nullptr);
+}
+
+ValueTree MainComponent::makeMixerValueTree(int nodeId)
+{
+    return ValueTree{ "nodeMix" + String{nodeId} }
+        .setProperty(Ids::pan, 0.5f, nullptr)
+        .setProperty(Ids::volume, 0.7, nullptr)
+        .setProperty(Ids::colour, colours[nodeId], nullptr);
 }

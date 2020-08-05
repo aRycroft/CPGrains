@@ -16,7 +16,6 @@
 #include "NodeChangeListener.h"
 #include "ConnectionChangeListener.h"
 #include "MixerChangeListener.h"
-#include <stack>
 #include "ConnectionMenu.h"
 #include "NodeMenu.h"
 #include "SamplePicker.h"
@@ -57,13 +56,16 @@ private:
     void deleteNode(int nodeId);
     void makeConnection(CPGNode* from, CPGNode* to);
     void deleteConnection(int conId);
+    int getConnectionIndex(int from, int to);
+
+    void savePreset(String fileName);
+    void loadPreset(String fileName);
+    void resetState();
+    void sendStateToDSP();
+
     ValueTree makeNodeValueTree(int nodeId);
     ValueTree makeConnectionValueTree(int connectionIndex);
     ValueTree makeMixerValueTree(int nodeId);
-    int getConnectionIndex(int from, int to);
-    void sendStateToDSP();
-    void savePreset(String fileName);
-    void loadPreset(String fileName);
 
     CPGLookAndFeel LandF;
     Component nodePanel;
@@ -75,9 +77,7 @@ private:
     bool DSPOn{ false };
     bool mixerShowing{ false };
 
-    /*Popup menu stuff, could put this is another class*/
     std::unique_ptr<OSCParamSetter> setter;
-    std::stack<int> availableNodes;
     ValueTree paramTree{ "params" };
     ValueTree nodeParams{ "nodeParams" };
     ValueTree conParams{ "conParams" };
@@ -89,8 +89,8 @@ private:
     std::unique_ptr<NodeChangeListener> nodeChangeListener;
     std::unique_ptr<ConnectionChangeListener> connectionChangeListener;
     std::unique_ptr<MixerChangeListener> mixerChangeListener;
-    ConnectionMenu conMenu;
-    NodeMenu nodeMenu;
+    std::unique_ptr<ConnectionMenu> conMenu;
+    std::unique_ptr<NodeMenu> nodeMenu;
     std::unique_ptr<MixerMenu> mixerMenu;
     SamplePicker samplePanel;
     String colours[NUM_NODES] = { 
