@@ -15,7 +15,7 @@
 class CPGNode : public Component
 {
 public:
-	CPGNode(int nodeNo, int x, int y, juce::ValueTree tree, juce::Colour colour);
+	CPGNode(int nodeNo, int x, int y, juce::ValueTree tree);
 	void paint(Graphics& g) override;
 	void resized() override;
 	void mouseDown(const MouseEvent& e) override;

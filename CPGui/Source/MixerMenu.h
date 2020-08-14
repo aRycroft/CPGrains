@@ -11,41 +11,23 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Identifiers.h"
+#include "MixerParamContainer.h"
+#include "PresetPicker.h"
+
 class MixerMenu : public Component {
 public:
-    MixerMenu(ValueTree mixerParams)
-        : mixerParams(mixerParams)
+    MixerMenu(ValueTree params, ChangeListener* changeListener)
+        : nodeParams(params)
     {
-        for (int i = 0; i < mixerParams.getNumChildren(); i++) {
-            Slider* vol = sliders.add(new Slider{});
-            vol->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
-            vol->onValueChange = [this, i, mixerParams, vol] {
-                mixerParams.getChild(i).setProperty(Ids::volume, vol->getValue(), nullptr);
-            };
-            vol->setValue(mixerParams.getChild(i).getProperty(Ids::volume));
-            vol->setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-            vol->setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
-            Slider* panSlider = sliders.add(new Slider{});
-            panSlider->setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.001f, 1.0f));
-            panSlider->setValue(mixerParams.getChild(i).getProperty(Ids::pan));
-            panSlider->onValueChange = [this, i, mixerParams, panSlider] {
-                mixerParams.getChild(i).setProperty(Ids::pan, panSlider->getValue(), nullptr);
-            };
-            panSlider->setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
-            panSlider->setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
-            addAndMakeVisible(vol);
-            addAndMakeVisible(panSlider);
+        for (int i = 0; i < 4; i++) {
+            nodeContainers[i].setColour(0, juce::Colour::fromString(nodeParams.getChild(i).getProperty(Ids::colour).toString()));
+            addAndMakeVisible(nodeContainers[i]);
         }
-    }
-
-    void paint(Graphics& g) override
-    {
-        g.fillAll(Colours::slateblue);
-        int numChildren = mixerParams.getNumChildren();
-        for (int i = 0; i < numChildren; i++) {
-            g.setColour(juce::Colour::fromString(mixerParams.getChild(i).getProperty(Ids::colour).toString()));
-            g.fillRect(Rectangle<int>{i *  getWidth() / numChildren, 0, getWidth() / numChildren, getHeight()});
+        for (int i = 0; i < nodeParams.getNumChildren(); i++) {
+            addNodeSliders(i);
         }
+        presetPicker.reset(new PresetPicker{changeListener});
+        addAndMakeVisible(presetPicker.get());
     }
 
     void resized() override
@@ -54,28 +36,67 @@ public:
 
         using Track = Grid::TrackInfo;
 
-        Array<Track> tracks;
-        Array<GridItem> items;
-        for (auto* s : sliders) {
-            tracks.add(Track(1_fr));
-            items.add(GridItem{ s });
-        }
-        grid.templateRows = { Track(1_fr) };
-        grid.templateColumns = tracks;
-        grid.items = items;
+        grid.templateRows = { Track(1_fr), Track(1_fr), Track(1_fr) };
+        grid.templateColumns = { Track(1_fr), Track(1_fr) };
+        grid.autoFlow = juce::Grid::AutoFlow::rowDense;
+        grid.items = { GridItem{nodeContainers[0]}, GridItem{nodeContainers[1]},
+                       GridItem{nodeContainers[2]}, GridItem{nodeContainers[3]},
+                       GridItem{presetPicker.get()}.withArea(3, GridItem::Span(2)) 
+        }; 
         grid.performLayout(getLocalBounds());
     }
 
-    void setParams(ValueTree params) 
+    void visibilityChanged() override
     {
-        mixerParams.copyPropertiesAndChildrenFrom(params, nullptr);
-        for (int i = 0; i < mixerParams.getNumChildren(); i++) {
-            sliders[i]->setValue(mixerParams.getChild(i).getProperty(Ids::volume), dontSendNotification);
-            sliders[i + 1]->setValue(mixerParams.getChild(i + 1).getProperty(Ids::pan), dontSendNotification);
+        if (isVisible()) {
+            for (int i = 0; i < nodeParams.getNumChildren(); i++) {
+                ValueTree child = nodeParams.getChild(i);
+                sliders[5 * i + 0]->setValue(child.getProperty(Ids::grainLength), dontSendNotification);
+                sliders[5 * i + 1]->setValue(child.getProperty(Ids::startTime), dontSendNotification);
+                sliders[5 * i + 2]->setValue(child.getProperty(Ids::frequency), dontSendNotification);
+                sliders[5 * i + 3]->setValue(child.getProperty(Ids::volume), dontSendNotification);
+                sliders[5 * i + 4]->setValue(child.getProperty(Ids::pan), dontSendNotification);
+            }
         }
     }
+
+    String getPresetFilePath() {
+        return presetPicker->getPresetPath();
+    }
+
 private:
+    void addNodeSliders(int i) {
+        addSlider(5.0f, 5000.0f, 0.25f, Ids::grainLength, i);
+        addSlider(0.0f, 1.0f, 1.0f, Ids::startTime, i);
+        addSlider(0.03125f, 200, 0.5f, Ids::frequency, i);
+        addSlider(0.0f, 1.0f, 1.0f, Ids::volume, i);
+        addSlider(0.0f, 1.0f, 1.0f, Ids::pan, i);
+    }
+
+    void addSlider(float rangeStart, float rangeEnd, float skewFactor, Identifier property, int i) {
+        Slider* slider = sliders.add(new Slider{});
+        slider->setNormalisableRange(NormalisableRange<double>(rangeStart, rangeEnd, 0.001f, skewFactor));
+        slider->onValueChange = [this, i, slider, property]{
+            nodeParams.getChild(i).setProperty(property, slider->getValue(), nullptr);
+        };
+        slider->setSliderStyle(juce::Slider::SliderStyle::Rotary);
+        /*Change this in look and feel, we did it before remember?*/
+        slider->setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
+        Label* label = labels.add(new Label{});
+        if (property == Ids::grainLength) label->setText("Size", dontSendNotification);
+        if (property == Ids::startTime) label->setText("Position", dontSendNotification);
+        if (property == Ids::frequency) label->setText("Density", dontSendNotification);
+        if (property == Ids::volume) label->setText("Gain", dontSendNotification);
+        if (property == Ids::pan) label->setText("Pan", dontSendNotification);
+        label->setJustificationType(juce::Justification::topLeft);
+        nodeContainers[i].addAndMakeVisible(label);
+        nodeContainers[i].addAndMakeVisible(slider);
+    }
+
     OwnedArray<Slider> sliders;
+    OwnedArray<Label> labels;
     OwnedArray<Rectangle<int>> outlineRects;
-    ValueTree mixerParams, nodeParams;
+    ValueTree nodeParams;
+    MixerParamContainer nodeContainers[4];
+    std::unique_ptr<PresetPicker> presetPicker;
 };

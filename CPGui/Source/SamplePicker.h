@@ -11,13 +11,14 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Identifiers.h"
+#include "ParamSetter.h"
 
 struct SamplePicker : public Component,
                       public ChangeListener,
                       public Button::Listener,
                       public ValueTree::Listener
 {
-    SamplePicker(ChangeListener* listener, ValueTree nodeParams)
+    SamplePicker(ParamSetter* setter, ValueTree nodeParams)
         :
         waveformCache(5),
         waveform(512, waveformManager, waveformCache),
@@ -32,7 +33,7 @@ struct SamplePicker : public Component,
         chooser.reset(new juce::FileChooser("Select a Wave file to play...",
             {},
             "*.wav;*.mp3"));
-        this->listener = listener;
+        this->setter = setter;
     }
     void paint(Graphics& g) override 
     {
@@ -83,7 +84,7 @@ struct SamplePicker : public Component,
             {
                 waveform.setSource(new juce::FileInputSource(f));
                 showWaveform = true;
-                listener->changeListenerCallback(nullptr);
+                setter->setFile(chooser->getResult().getFullPathName());
             }
         }
     }
@@ -104,6 +105,6 @@ private:
     std::unique_ptr<juce::FileChooser> chooser;
     bool showWaveform{ false };
     juce::TextButton openButton;
-    juce::ChangeListener* listener;
+    ParamSetter* setter;
     juce::ValueTree params;
 };

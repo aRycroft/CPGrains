@@ -36,7 +36,6 @@ public:
             false, false, false, false);
         setBounds(bounds);
         nodeTree.setProperty(Ids::startTime, (double)getX() / (double)getParentWidth(), nullptr);
-        DBG(nodeTree.toXmlString());
     }
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
         if (property == Ids::startTime) {
