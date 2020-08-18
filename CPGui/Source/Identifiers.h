@@ -9,9 +9,13 @@
 */
 
 #pragma once
-
 #include "../JuceLibraryCode/JuceHeader.h"
-
+/*enum ColourId {
+    node1 = 5000,
+    node2 = 5001,
+    node3 = 5002,
+    node4 = 5003
+} ColourId;*/
 namespace Ids
 {
     #define MAKE_ID(name) const Identifier name (#name)
@@ -37,3 +41,10 @@ namespace Ids
     MAKE_ID(pan);
     MAKE_ID(volume);
 }
+
+/*enum ColourId {
+    node1 = 5000,
+    node2 = 5001,
+    node3 = 5002,
+    node4 = 5003
+} ColourIDS;*/

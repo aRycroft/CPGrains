@@ -16,7 +16,7 @@ MainComponent::MainComponent()
     connectionChangeListener{ new ConnectionChangeListener{ paramTree, setter.get()} },
     mixerChangeListener{ new MixerChangeListener{ paramTree, setter.get()} }
 {
-
+    this->setLookAndFeel(&LandF);
     paramTree.addChild(nodeParams, 0, nullptr);
     paramTree.addChild(conParams, 1, nullptr);
 
@@ -56,16 +56,21 @@ MainComponent::MainComponent()
     addAndMakeVisible(&addPreset);
     setSize (1000, 600);
     //loadPreset("SlowMod");
+    if (!connect(8001))                       // [3]
+        showConnectionErrorMessage("Error: could not connect to UDP port 8001.");
+
+    addListener(this, "/CPG/");     // [4]
 }
 
 MainComponent::~MainComponent()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
 void MainComponent::paint (Graphics& g)
 {
-    g.fillAll (juce::Colours::darkslategrey);
+    g.fillAll(findColour(juce::ResizableWindow::backgroundColourId));
     for (int i{ 0 }; i < NUM_CONNECTIONS; i++) {
         if (conParams.getChild(i).getProperty(Ids::active)) {
             cons[i]->recalculatePath();
@@ -170,6 +175,7 @@ void MainComponent::buttonClicked(Button* button)
         if (mixerShowing) {
             mixerMenu->setVisible(true);
             nodePanel.setVisible(false);
+            animator.cancelAllAnimations(true);
         }
         else {
             mixerMenu->setVisible(false);
@@ -338,6 +344,30 @@ void MainComponent::sendStateToDSP()
     if (!file.isEmpty()) {
         setter->setFile(samplePanel->getFileName());
     }
+}
+
+void MainComponent::oscMessageReceived(const juce::OSCMessage& message)
+{
+    if (message.size() >= 1 && message[0].isInt32() && !mixerShowing) {
+        int nodeNumber = message[0].getInt32();
+        if (nodes[nodeNumber] != nullptr) {
+            CPGTriggerComponent trig{ juce::Colour::fromString(colours[nodeNumber]) };
+            trig.setSize(NODESIZE, NODESIZE);
+            trig.setTopLeftPosition(nodes[nodeNumber]->getPosition());
+            trig.setInterceptsMouseClicks(false, false);
+            addAndMakeVisible(trig);
+            animator.animateComponent(&trig, trig.getBounds().expanded(10), 0.0f, 
+                std::fmin(nodeParams.getChild(nodeNumber).getProperty(Ids::grainLength), 400.0), true, 1.0f, 1.0f);
+        }
+    }
+}
+
+void MainComponent::showConnectionErrorMessage(const juce::String& messageText)
+{
+    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+        "Connection error",
+        messageText,
+        "OK");
 }
 
 

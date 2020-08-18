@@ -41,7 +41,7 @@ public:
         grid.autoFlow = juce::Grid::AutoFlow::rowDense;
         grid.items = { GridItem{nodeContainers[0]}, GridItem{nodeContainers[1]},
                        GridItem{nodeContainers[2]}, GridItem{nodeContainers[3]},
-                       GridItem{presetPicker.get()}.withArea(3, GridItem::Span(2)) 
+                       GridItem{presetPicker.get()}.withArea(3, GridItem::Span(1)) 
         }; 
         grid.performLayout(getLocalBounds());
     }

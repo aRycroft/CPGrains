@@ -11,6 +11,8 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrainPositionSliderBox.h"
+#include "Identifiers.h"
+
 #define NODESIZE 70
 class CPGNode : public Component
 {
@@ -40,10 +42,9 @@ public:
 	};
 
 private:
-	//void addParams();
+	bool isActive{ true };
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
-	bool isActive{ true };
 	juce::Colour defaultColour;
 	juce::Colour activeColour;
 	int nodeNumber;

@@ -10,8 +10,8 @@
 
 #pragma once
 #include "JuceHeader.h"
-#include "CPGNode.h"
 #include "Identifiers.h"
+#include "CPGNode.h"
 
 class CPGConnection 
 {

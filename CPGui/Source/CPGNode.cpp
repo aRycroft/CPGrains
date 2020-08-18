@@ -24,16 +24,11 @@ CPGNode::CPGNode(int nodeNo, int x, int y, juce::ValueTree tree)
 void CPGNode::paint(Graphics& g)
 {
 	auto area = getLocalBounds().reduced(1);
-
+	g.setColour(juce::Colours::darkgrey);
+	g.fillRoundedRectangle(area.toFloat(), 100.0f);
+	area = area.reduced(5);
 	g.setColour(activeColour);
-	if (isActive) {
-		g.fillRoundedRectangle(area.toFloat(), 100.0f);
-	}
-	else {
-		g.drawRoundedRectangle(area.toFloat(), 100.0f, 2.0f);
-	}
-
-	g.setColour(Colours::black);
+	g.drawRoundedRectangle(area.toFloat(), 100.0f, 5.0f);
 }
 
 void CPGNode::resized()

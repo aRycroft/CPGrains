@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Identifiers.h"
 #include "CPGLookAndFeel.h"
 #include "CPGNode.h"
 #include "CPGConnection.h"
@@ -20,7 +21,7 @@
 #include "NodeMenu.h"
 #include "SamplePicker.h"
 #include "MixerMenu.h"
-#include "Identifiers.h"
+#include "CPGTriggerComponent.h"
 
 
 #define NUM_NODES 4
@@ -36,7 +37,9 @@ class MainComponent   : public Component,
                         public ComponentListener,
                         public Button::Listener,
                         public ValueTree::Listener,
-                        public ChangeListener
+                        public ChangeListener,
+                        private juce::OSCReceiver,
+                        private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -62,6 +65,9 @@ private:
     void loadPreset(String fileName);
     void resetState();
     void sendStateToDSP();
+
+    void oscMessageReceived(const juce::OSCMessage& message) override;
+    void showConnectionErrorMessage(const juce::String& messageText);
 
     ValueTree makeNodeValueTree(int nodeId);
     ValueTree makeConnectionValueTree(int connectionIndex);
@@ -92,11 +98,13 @@ private:
     std::unique_ptr<MixerMenu> mixerMenu;
     std::unique_ptr<SamplePicker> samplePanel;
     String colours[NUM_NODES] = { 
-        Colours::dodgerblue.toString(),
-        Colours::orangered.toString(),
-        Colours::gainsboro.toString(),
-        Colours::darkgreen.toString()
+       "ff2EC4B6",
+       "fff3722c",
+       "ffED5034",
+       "fff9c74f"
     };
+    juce::ComponentAnimator animator;
+    OwnedArray<CPGTriggerComponent> triggers;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
     
