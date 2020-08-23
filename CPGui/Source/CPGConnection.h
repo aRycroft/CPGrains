@@ -24,11 +24,12 @@ public:
     Identifier getId();
     void recalculatePath();
     Path* getPath();
-    Path* getParameterPathBands();
+    Path* getLengthPath();
+    Path* getSizePath();
     bool containsPoint(Point<float> p);
 private:
     static Point<int> getCentre(Component* comp);
     CPGNode *connectedTo, *parent;
-    Path path, bandPath;
+    Path path, lengthPath, sizePath;
     ValueTree params;
 };

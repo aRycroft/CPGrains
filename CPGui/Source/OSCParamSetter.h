@@ -21,6 +21,7 @@ public:
     void setConParam(String toSet, int from, int to, float value) override;
     void setFile(String filePath) override;
     void setDSPState(bool DSPon) override;
+    void changePortOutNumber(int newNumber);
 private:
     OSCSender sender;
     int tick = 0;

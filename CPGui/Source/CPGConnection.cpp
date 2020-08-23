@@ -63,6 +63,70 @@ void CPGConnection::recalculatePath()
     path.addLineSegment(betweenPoints.toFloat(), 7.0f);
     path.addArrow(Line<int>{lineStart, parentEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
     path.addArrow(Line<int>{lineEnd, connectedEdge}.toFloat(), 7.0f, 40.0f, 500.0f);
+    /*This should be a function but I'm lazy*/
+    weight = params[Ids::lengthMod];
+    direction = params[Ids::lengthModDir];
+    fWeight = weight * (1 - direction);
+    weight *= direction;
+    sizePath.clear();
+    lengthPath.clear();
+    if (betweenPoints.getLength() >= 20) {
+        if (fWeight) {
+            Line<int> band1{ betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) *
+                (10.0 / betweenPoints.getLength()),
+                    betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) *
+                (20.0 / betweenPoints.getLength()) };
+            AffineTransform rotate90;
+            rotate90 = rotate90.rotation(float_Pi / 2, band1.getStartX(), band1.getStartY());
+            band1.applyTransform(rotate90);
+            lengthPath.addLineSegment(band1.toFloat(), 10.0f);
+        }
+        if (weight) {
+            Line<int> band1{ betweenPoints.getEnd() + (betweenPoints.getStart() - betweenPoints.getEnd()) *
+                (10.0 / betweenPoints.getLength()),
+                    betweenPoints.getEnd() + (betweenPoints.getStart() - betweenPoints.getEnd()) *
+                (20.0 / betweenPoints.getLength()) };
+            AffineTransform rotate90;
+            rotate90 = rotate90.rotation(float_Pi / 2, band1.getStartX(), band1.getStartY());
+            band1.applyTransform(rotate90);
+            lengthPath.addLineSegment(band1.toFloat(), 10.0f);
+        }
+        weight = params[Ids::startMod];
+        direction = params[Ids::startModDir];
+        fWeight = weight * (1 - direction);
+        weight *= direction;
+
+        if (fWeight) {
+            Line<int> band1{ betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) *
+                (20.0 / betweenPoints.getLength()),
+                    betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) *
+                (30.0 / betweenPoints.getLength()) };
+            AffineTransform rotate90;
+            rotate90 = rotate90.rotation(float_Pi / 2, band1.getStartX(), band1.getStartY());
+            band1.applyTransform(rotate90);
+            sizePath.addLineSegment(band1.toFloat(), 10.0f);
+        }
+        if (weight) {
+            Line<int> band1{ betweenPoints.getEnd() + (betweenPoints.getStart() - betweenPoints.getEnd()) *
+                (20.0 / betweenPoints.getLength()),
+                    betweenPoints.getEnd() + (betweenPoints.getStart() - betweenPoints.getEnd()) *
+                (30.0 / betweenPoints.getLength()) };
+            AffineTransform rotate90;
+            rotate90 = rotate90.rotation(float_Pi / 2, band1.getStartX(), band1.getStartY());
+            band1.applyTransform(rotate90);
+            sizePath.addLineSegment(band1.toFloat(), 10.0f);
+        }
+    }
+
+    /*
+    betweenPoints.setStart(betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) *
+        (10.0 / betweenPoints.getLength()));
+    Point<int> end = betweenPoints.getStart() + (betweenPoints.getEnd() - betweenPoints.getStart()) * 
+        ((double)fWeight / betweenPoints.getLength());
+    Line<int> band1{ betweenPoints.getStart(), end };*/
+
+
+    
 }
 
 Path* CPGConnection::getPath()
@@ -70,8 +134,14 @@ Path* CPGConnection::getPath()
     return &path;
 }
 
-Path* CPGConnection::getParameterPathBands() {
-    return &bandPath;
+Path* CPGConnection::getLengthPath()
+{
+    return &lengthPath;
+}
+
+Path* CPGConnection::getSizePath()
+{
+    return &sizePath;
 }
 
 bool CPGConnection::containsPoint(Point<float> point)

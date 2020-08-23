@@ -43,17 +43,17 @@ MainComponent::MainComponent()
     /*Extra main controls, could put these elsewhere?*/
     DSPButton.addListener(this);
     addAndMakeVisible(&DSPButton);
+    DSPButton.setButtonText("Toggle DSP");
     DSPLabel.setText("Toggle DSP", dontSendNotification);
     DSPLabel.attachToComponent(&DSPButton, true);
     addAndMakeVisible(&DSPLabel);
 
     toggleMixer.addListener(this);
     addAndMakeVisible(&toggleMixer);
+    toggleMixer.setButtonText("Toggle Mixer");
     toggleMixerLabel.setText("Toggle Mixer", dontSendNotification);
     toggleMixerLabel.attachToComponent(&toggleMixer, true);
     addAndMakeVisible(&toggleMixerLabel);
-    addPreset.addListener(this);
-    addAndMakeVisible(&addPreset);
     setSize (1000, 600);
     //loadPreset("SlowMod");
     if (!connect(8001))                       // [3]
@@ -76,25 +76,45 @@ void MainComponent::paint (Graphics& g)
             cons[i]->recalculatePath();
             g.setColour(Colours::black);
             g.fillPath(*cons[i]->getPath());
-            g.setColour(Colours::antiquewhite);
-            g.fillPath(*cons[i]->getParameterPathBands());
+            g.setColour(Colours::darkgreen);
+            g.fillPath(*cons[i]->getLengthPath());
+            g.setColour(Colours::darkred);
+            g.fillPath(*cons[i]->getSizePath());
         }
     }
 }
 
 void MainComponent::resized()
 {
-    int width = getWidth();
-    DSPButton.setBounds(width - 100, 100, 50, 50);
-    toggleMixer.setBounds(width - 100, 150, 50, 50);
-    addPreset.setBounds(width - 100, 200, 50, 50);
+
+    Grid grid;
+
+    using Track = Grid::TrackInfo;
+
+    grid.templateRows = { Track(10_fr), Track(1_fr), Track(1_fr) };
+    grid.templateColumns = { Track(1_fr), Track(9_fr) };
+    if (mixerShowing) {
+        grid.items = { GridItem(mixerMenu.get()).withArea(1, GridItem::Span(2)),
+            GridItem(samplePanel.get()).withArea(GridItem::Span(2), 2),
+            GridItem(toggleMixer).withArea(2, 1),
+            GridItem(DSPButton).withArea(3, 1)
+        };
+    }
+    else {
+        grid.items = { GridItem(nodePanel).withArea(1, GridItem::Span(2)),
+            GridItem(samplePanel.get()).withArea(GridItem::Span(2), 2),
+            GridItem(toggleMixer).withArea(2, 1),
+            GridItem(DSPButton).withArea(3, 1)
+        };
+    }
+    grid.performLayout(getLocalBounds());
 
     for (int i{ 0 }; i < NUM_NODES; i++) {
         CPGNode* node = nodes[i].get();
         if (node != nullptr) {
             double x = nodeParams.getChild(i).getProperty(Ids::x);
             double y = nodeParams.getChild(i).getProperty(Ids::y);
-            node->setBounds(x * this->getWidth(), y * this->getHeight(),
+            node->setBounds(x * (double) this->getWidth(), y * (double) this->getHeight(),
                 NODESIZE, NODESIZE);
             double grainPosition = nodeParams.getChild(i).getProperty(Ids::startTime);
             Component* sliderBox = node->getSliderBox();
@@ -103,19 +123,6 @@ void MainComponent::resized()
         }
     }
 
-    Grid grid;
-
-    using Track = Grid::TrackInfo;
-   
-    grid.templateRows = { Track(5_fr), Track(1_fr) };
-    grid.templateColumns = { Track(1_fr)};
-    if (mixerShowing) {
-        grid.items = { GridItem(mixerMenu.get()), GridItem(samplePanel.get()) };
-    }
-    else {
-        grid.items = { GridItem(nodePanel), GridItem(samplePanel.get()) };
-    }
-    grid.performLayout(getLocalBounds());
 }
 
 void MainComponent::mouseDown(const MouseEvent& e)
@@ -183,9 +190,6 @@ void MainComponent::buttonClicked(Button* button)
         }
         resized();
     }
-    else if (button == &addPreset) {
-        savePreset("test");
-    }
 }
 
 void MainComponent::makeNode(int x, int y)
@@ -204,7 +208,6 @@ void MainComponent::makeNode(int x, int y)
     nodes[nodeId]->addMouseListener(this ,false);
     nodePanel.addAndMakeVisible(nodes[nodeId].get());
     samplePanel->addAndMakeVisible(nodes[nodeId]->getSliderBox());
-    setter->setParam("active", nodeId, 0);
     nodeTree.setProperty(Ids::active, true, nullptr);
     nodeTree.setProperty(Ids::x, (double) x / (double) getWidth(), nullptr);
     nodeTree.setProperty(Ids::y, (double) y / (double) getHeight(), nullptr);
@@ -282,22 +285,36 @@ void MainComponent::componentMovedOrResized(Component& movedComp, bool wasMoved,
     }
 }
 
-void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
+void MainComponent::actionListenerCallback(const String& message)
+{
+    if (message == "loadPreset") {
+        loadPreset(mixerMenu->getPresetFilePath());
+    }
+    else if (message == "savePreset") {
+        savePreset(mixerMenu->savePresetFilePath());
+    }
+    else if (message == "portInChanged") {
+        connect(mixerMenu->getPortInNumber().getIntValue());
+    }
+    else if (message == "portOutChanged") {
+        setter->changePortOutNumber(mixerMenu->getPortOutNumber().getIntValue());
+    }
+}
+
+/*void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     loadPreset(mixerMenu->getPresetFilePath());
-}
+}*/
 
 void MainComponent::savePreset(String fileName)
 {
     File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath)
-        .getParentDirectory().getFullPathName() + "\\" + fileName + ".xml"};
+        .getParentDirectory().getChildFile("Presets/" + fileName + ".xml") };
     paramTree.createXml()->writeTo(fileLocation);
 }
 
 void MainComponent::loadPreset(String fileName)
 {
-    /*File fileLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath).getParentDirectory().getFullPathName() 
-        + "\\" + fileName + ".xml" };*/
     File fileLocation(fileName);
     if (fileLocation.existsAsFile()) {
         resetState();
@@ -319,6 +336,7 @@ void MainComponent::loadPreset(String fileName)
         }
     }
     sendStateToDSP();
+    mixerMenu->visibilityChanged();
 }
 
 void MainComponent::resetState() 
@@ -375,6 +393,7 @@ ValueTree MainComponent::makeNodeValueTree(int nodeId)
 {
     return ValueTree{ "node" + String{nodeId} }
         .setProperty(Ids::active, false, nullptr)
+        .setProperty(Ids::muted, false, nullptr)
         .setProperty(Ids::x, 0.0, nullptr)
         .setProperty(Ids::y, 0.0, nullptr)
         .setProperty(Ids::grainLength, 200.0, nullptr)

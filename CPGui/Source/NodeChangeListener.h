@@ -23,10 +23,10 @@ public:
     void valueTreePropertyChanged(ValueTree& vTree, const Identifier& property) override {
         int nodeID = vTree.getType().toString().getLastCharacter() - '0';
         if (property == Ids::grainLength || property == Ids::startTime || property == Ids::frequency || property == Ids::pan || property == Ids::volume) {
-            setter->setParam(property.toString(), nodeID, vTree.getProperty(property));
+            setter->setParam(property.toString(), nodeID, vTree[property]);
         }
-        else if (property == Ids::active) {
-            setter->setParam(property.toString(), nodeID, (vTree.getProperty(property)) ? 0.0f : 1.0f);
+        else if (property == Ids::active || property == Ids::muted) {
+            setter->setParam(property.toString(), nodeID, (vTree[property]) ? 0.0f : 1.0f);
         }
     };
 private:

@@ -57,3 +57,8 @@ void OSCParamSetter::setDSPState(bool DSPon)
     msg << "/DSP/";
     sender.send(msg, (int)DSPon);
 }
+
+void OSCParamSetter::changePortOutNumber(int newNumber)
+{
+    sender.connect("127.0.0.1", newNumber);
+}

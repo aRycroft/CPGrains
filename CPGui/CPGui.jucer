@@ -2,6 +2,8 @@
 
 <JUCERPROJECT id="msDI5B" name="CPGui" projectType="guiapp" jucerVersion="5.4.5">
   <MAINGROUP id="rBdX0r" name="CPGui">
+    <FILE id="SmEoHx" name="PortAndUtilityPicker.h" compile="0" resource="0"
+          file="Source/PortAndUtilityPicker.h"/>
     <FILE id="Gxqmdh" name="CPGTriggerComponent.h" compile="0" resource="0"
           file="Source/CPGTriggerComponent.h"/>
     <FILE id="J6OUZS" name="PresetPicker.h" compile="0" resource="0" file="Source/PresetPicker.h"/>

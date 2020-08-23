@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<params>
+  <nodeParams>
+    <node0 active="1" x="0.59" y="0.3683333333333333" grainLength="200.0"
+           startTime="0.076" frequency="1.311249971389771" pan="0.5" volume="0.7"
+           colour="ff2EC4B6"/>
+    <node1 active="1" x="0.312" y="0.3633333333333333" grainLength="200.0"
+           startTime="0.343" frequency="1.651249963790178" pan="0.5" volume="0.7"
+           colour="fff3722c"/>
+    <node2 active="1" x="0.589" y="0.1066666666666667" grainLength="200.0"
+           startTime="0.129" frequency="5.151249885559082" pan="0.5" volume="0.7"
+           colour="ffED5034"/>
+    <node3 active="1" x="0.305" y="0.615" grainLength="248.700003631413"
+           startTime="0.627" frequency="18.03124959766865" pan="0.5" volume="0.7"
+           colour="fff9c74f"/>
+  </nodeParams>
+  <conParams>
+    <con0 active="1" from="1" to="0" weight="10.0" weightDir="0.44" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+    <con1 active="1" from="0" to="2" weight="3.7" weightDir="0.0" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+    <con2 active="0" from="3" to="0" weight="0.0" weightDir="0.0" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+    <con3 active="0" from="2" to="1" weight="0.0" weightDir="0.0" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+    <con4 active="1" from="1" to="3" weight="3.29" weightDir="0.0" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+    <con5 active="0" from="0" to="0" weight="1.0" weightDir="0.0" lengthMod="0.0"
+          lengthModDir="0.0" startMod="0.0" startModDir="0.0"/>
+  </conParams>
+</params>

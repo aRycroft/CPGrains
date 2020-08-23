@@ -27,10 +27,39 @@ public:
     Label* createSliderTextBox(Slider& slider) override
     {
         Label* l = LookAndFeel_V4::createSliderTextBox(slider);
-        //l->setBorderSize(BorderSize<int>(2, 2, 40, 2));
-        l->setColour(Label::outlineColourId, Colours::transparentWhite);
-        l->setColour(Label::outlineWhenEditingColourId, Colours::transparentWhite);
+        //l->setBorderSize(BorderSize<int>(0, 0, 0, 0));
+        l->setColour(Label::outlineColourId, Colours::tan);
+        l->setColour(Label::outlineWhenEditingColourId, Colours::red);
         return l;
+    }
+
+    void drawLabel(Graphics& g, Label& label) override
+    {
+        g.fillAll(label.findColour(Label::backgroundColourId));
+
+        if (!label.isBeingEdited())
+        {
+            auto alpha = label.isEnabled() ? 1.0f : 0.5f;
+            const Font font(getLabelFont(label));
+
+            g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
+            g.setFont(font);
+
+            auto textArea = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
+
+            g.drawFittedText(label.getText(), textArea, label.getJustificationType(),
+                jmax(1, (int)(textArea.getHeight() / font.getHeight())),
+                label.getMinimumHorizontalScale());
+
+            //g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+            g.setColour(juce::Colours::transparentBlack);
+        }
+        else if (label.isEnabled())
+        {
+            g.setColour(label.findColour(Label::outlineColourId));
+        }
+
+        g.drawRect(label.getLocalBounds());
     }
 
     Slider::SliderLayout getSliderLayout(Slider& slider) override

@@ -24,13 +24,19 @@ public:
 
         using Track = Grid::TrackInfo;
         grid.templateRows = { Track(2_fr), Track(1_fr) };
-        grid.templateColumns = { Track(1_fr), Track(2_fr), Track(1_fr), Track(2_fr), Track(1_fr), Track(2_fr) };
+        grid.templateColumns = { Track(1_fr), Track(1_fr), Track(1_fr), Track(1_fr), Track(1_fr), Track(1_fr) };
         auto children = this->getChildren();
-        grid.items = {  GridItem{children[0]}, GridItem{children[1]}, GridItem{children[2]}, GridItem{children[3]}, GridItem{children[4]}, GridItem{children[5]},
-                        GridItem{}, GridItem{}, GridItem{children[6]}, GridItem{children[7]}, GridItem{children[8]}, GridItem{children[9]}
+        grid.items = {  
+            GridItem{children[1]}.withArea(1, 2),
+            GridItem{children[3]}.withArea(1, 4),
+            GridItem{children[5]}.withArea(1, 6),
+            GridItem{children[10]}.withArea(2, 1),
+            GridItem{children[11]}.withArea(2, 2),
+            GridItem{children[7]}.withArea(2, 4),
+            GridItem{children[9]}.withArea(2, 6),
+
         };
         grid.performLayout(getLocalBounds());
-
     }
 private:
 };

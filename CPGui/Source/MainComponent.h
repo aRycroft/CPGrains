@@ -37,7 +37,7 @@ class MainComponent   : public Component,
                         public ComponentListener,
                         public Button::Listener,
                         public ValueTree::Listener,
-                        public ChangeListener,
+                        public ActionListener,
                         private juce::OSCReceiver,
                         private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>
 {
@@ -53,7 +53,7 @@ public:
     void mouseDoubleClick(const MouseEvent& event) override;
     void buttonClicked(Button* button) override;
     void componentMovedOrResized(Component& movedComp, bool wasMoved, bool wasResized);
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    void actionListenerCallback(const String& message) override;
 private:
     void makeNode(int x, int y);
     void deleteNode(int nodeId);
@@ -74,14 +74,13 @@ private:
 
     CPGLookAndFeel LandF;
     Component nodePanel;
-    TextButton toggleMixer, addPreset;
+    TextButton toggleMixer;
     ToggleButton DSPButton;
     Slider mainFreqSlider;
     std::unique_ptr<FilenameComponent> fileComp;
     Label mFreqLabel, fileLabel, DSPLabel, toggleMixerLabel;
     bool DSPOn{ false };
     bool mixerShowing{ false };
-
     std::unique_ptr<OSCParamSetter> setter;
     ValueTree paramTree{ "params" };
     ValueTree nodeParams{ "nodeParams" };
