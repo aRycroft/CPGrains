@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "dsp.gen",
-		"rect" : [ 35.0, 85.0, 1523.0, 740.0 ],
+		"rect" : [ 42.0, 85.0, 1111.0, 733.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -40,6 +40,17 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-1",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 820.092664420604706, 669.0, 100.0, 22.0 ],
+					"text" : "out 2"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-17",
 					"linecount" : 2,
 					"maxclass" : "newobj",
@@ -48,18 +59,6 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 1105.0, 14.0, 100.0, 36.0 ],
 					"text" : "history lastSample 0"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"id" : "obj-1",
-					"maxclass" : "newobj",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 443.018194258213043, 102.0, 100.0, 22.0 ],
-					"text" : "/ 1000"
 				}
 
 			}
@@ -82,7 +81,7 @@
 					"numinlets" : 0,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 820.092664420604706, 102.0, 100.0, 22.0 ],
+					"patching_rect" : [ 560.709684312343597, 96.0, 100.0, 22.0 ],
 					"text" : "in 3"
 				}
 
@@ -155,7 +154,7 @@
 					"numinlets" : 0,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 443.018194258213043, 70.0, 37.0, 22.0 ],
+					"patching_rect" : [ 311.018194258213043, 96.0, 37.0, 22.0 ],
 					"text" : "in 2"
 				}
 
@@ -174,7 +173,7 @@
 			}
 , 			{
 				"box" : 				{
-					"code" : "getNextChannel(data, last){\r\n\tval = -1;\r\n\tfor(i=0; i<dim(data); i+=1){\r\n\t\tindex = (last + i) % dim(data);\r\n\t\tif(data.peek(index) == -1){\r\n\t\t\tval = index;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\treturn val;\r\n}\r\n\r\ngetHammingValue(hammBuffer, channelValue){\r\n\thammValue = scale(channelValue, 0, 1, 0, 2048);\r\n\treturn hammBuffer.peek(round(hammValue));\r\n}\r\n\r\n\r\nif(in1){\r\n\tfree = getNextChannel(channels, lastSample);\r\n\tlastSample = free;\r\n\tif(free != -1){\r\n\t\tchannels.poke(0, free);\r\n\t\tlengthsArray.poke(in2, free);\r\n\t\tstartArray.poke(in3, free);\r\n\t}\r\n}\r\n\r\nreturnSample = 0;\r\n\r\nfor(i = 0; i < dim(channels); i+=1){\r\n\tchannelVal = channels.peek(i);\r\n\tgrainMs = lengthsArray.peek(i);\r\n\tif(channelVal != -1){\r\n\t\tif(channelVal >= 1){\r\n\t\t\tchannels.poke(-1, i);\r\n\t\t\tlengthsArray.poke(-1, i);\r\n\t\t\tstartArray.poke(-1, i);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tgrainLength = 1 / (grainMs * samplerate);\r\n\t\t\tstartSamp = (startArray.peek(i) / 1000) * samplerate;\r\n\t\t\t/*PROBLEM LINE OF CODE Grainlength is negative maybe?*/\r\n\t\t\tchannels.poke(channelVal + grainLength, i);\r\n\t\t\tscaledValue = scale(channelVal, 0, 1, startSamp, grainMs  * samplerate + startSamp);\r\n\t\t\tsample = audio.peek(round(scaledValue)) * getHammingValue(hamming, channelVal);\r\n\t\t\treturnSample += sample;\r\n\t\t}\t\r\n\t}\r\n}\r\n\r\nout1 = returnSample;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+					"code" : "getNextChannel(data, last){\r\n\tval = -1;\r\n\tfor(i=0; i<dim(data); i+=1){\r\n\t\tindex = (last + i) % dim(data);\r\n\t\tif(data.peek(index) == -1){\r\n\t\t\tval = index;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\treturn val;\r\n}\r\n\r\ngetHammingValue(hammBuffer, channelValue){\r\n\thammValue = scale(channelValue, 0, 1, 0, 2048);\r\n\treturn hammBuffer.peek(round(hammValue));\r\n}\r\n\r\n\r\nif(in1){\r\n\tout2 = 1;\r\n\tfree = getNextChannel(channels, lastSample);\r\n\tlastSample = free;\r\n\tif(free != -1){\r\n\t\tchannels.poke(0, free);\r\n\t\tlengthsArray.poke(in2, free);\r\n\t\tstartArray.poke(in3, free);\r\n\t}\r\n}\r\n\r\nreturnSample = 0;\r\n\r\nfor(i = 0; i < dim(channels); i+=1){\r\n\tchannelVal = channels.peek(i);\r\n\tgrainMs = lengthsArray.peek(i);\r\n\tif(channelVal != -1){\r\n\t\tif(channelVal >= 1){\r\n\t\t\tchannels.poke(-1, i);\r\n\t\t\tlengthsArray.poke(-1, i);\r\n\t\t\tstartArray.poke(-1, i);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tgrainLength = 1 / (grainMs * samplerate);\r\n\t\t\tstartSamp = (startArray.peek(i) / 1000) * samplerate;\r\n\t\t\tchannels.poke(channelVal + grainLength, i);\r\n\t\t\tscaledValue = scale(channelVal, 0, 1, startSamp, grainMs  * samplerate + startSamp);\r\n\t\t\tsample = audio.peek(round(scaledValue)) * getHammingValue(hamming, channelVal);\r\n\t\t\treturnSample += sample;\r\n\t\t}\t\r\n\t}\r\n}\r\n\r\nout1 = returnSample;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
 					"fontface" : 0,
 					"fontname" : "Lucida Console",
 					"fontsize" : 12.0,
@@ -191,13 +190,6 @@
 		"lines" : [ 			{
 				"patchline" : 				{
 					"destination" : [ "obj-6", 1 ],
-					"source" : [ "obj-1", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-1", 0 ],
 					"source" : [ "obj-2", 0 ]
 				}
 
@@ -213,6 +205,13 @@
 				"patchline" : 				{
 					"destination" : [ "obj-6", 0 ],
 					"source" : [ "obj-5", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-6", 1 ]
 				}
 
 			}
