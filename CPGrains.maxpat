@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 42.0, 85.0, 1532.0, 749.0 ],
+		"rect" : [ 34.0, 77.0, 1452.0, 929.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -473,7 +473,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 614.802612980827803, 276.821956396102905, 50.0, 22.0 ],
+					"patching_rect" : [ 783.12632559700296, 298.821956396102905, 50.0, 22.0 ],
 					"text" : "clear"
 				}
 
@@ -551,7 +551,7 @@
 								"box" : 								{
 									"code" : "if(in2){\r\n    out1 = 0;\t\r\n}\r\nelse if(prevSample <= 0 && in1 > 0){\r\n\tout1 = 1;\r\n}\r\nelse{\r\n \tout1 = 0;\r\n}\r\nprevSample = in1;",
 									"fontface" : 0,
-									"fontname" : "Lucida Console",
+									"fontname" : "<Monospaced>",
 									"fontsize" : 12.0,
 									"id" : "obj-6",
 									"maxclass" : "codebox",
@@ -690,7 +690,7 @@
 								"box" : 								{
 									"code" : "if(in2){\r\n    out1 = 0;\t\r\n}\r\nelse if(prevSample <= 0 && in1 > 0){\r\n\tout1 = 1;\r\n}\r\nelse{\r\n \tout1 = 0;\r\n}\r\nprevSample = in1;",
 									"fontface" : 0,
-									"fontname" : "Lucida Console",
+									"fontname" : "<Monospaced>",
 									"fontsize" : 12.0,
 									"id" : "obj-6",
 									"maxclass" : "codebox",
@@ -829,7 +829,7 @@
 								"box" : 								{
 									"code" : "if(in2){\r\n    out1 = 0;\t\r\n}\r\nelse if(prevSample <= 0 && in1 > 0){\r\n\tout1 = 1;\r\n}\r\nelse{\r\n \tout1 = 0;\r\n}\r\nprevSample = in1;",
 									"fontface" : 0,
-									"fontname" : "Lucida Console",
+									"fontname" : "<Monospaced>",
 									"fontsize" : 12.0,
 									"id" : "obj-6",
 									"maxclass" : "codebox",
@@ -981,7 +981,7 @@
 								"box" : 								{
 									"code" : "if(in2){\r\n    out1 = 0;\t\r\n}\r\nelse if(prevSample < 0 && prevprevSample < 0 && in1 > 0){\r\n\tout1 = 1;\r\n}\r\nelse{\r\n \tout1 = 0;\r\n}\r\nprevprevSample = prevSample;\r\nprevSample = in1;\r\n",
 									"fontface" : 0,
-									"fontname" : "Lucida Console",
+									"fontname" : "<Monospaced>",
 									"fontsize" : 12.0,
 									"id" : "obj-6",
 									"maxclass" : "codebox",
@@ -4847,18 +4847,6 @@
 			}
 , 			{
 				"box" : 				{
-					"id" : "obj-91",
-					"maxclass" : "message",
-					"numinlets" : 2,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 623.0, 313.0, 50.0, 22.0 ],
-					"text" : "info"
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"format" : 6,
 					"id" : "obj-123",
 					"maxclass" : "flonum",
@@ -6388,7 +6376,7 @@
 					"numinlets" : 5,
 					"numoutlets" : 6,
 					"outlettype" : [ "float", "float", "float", "float", "list", "" ],
-					"patching_rect" : [ 951.319961249828339, 199.787917852401733, 286.146327972412109, 66.424164295196533 ],
+					"patching_rect" : [ 960.319961249828339, 203.663808584213257, 286.146327972412109, 66.424164295196533 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 89.319961249828339, 165.0, 524.146327972412109, 94.424164295196533 ],
 					"setmode" : 1
@@ -6569,18 +6557,6 @@
 					"outlettype" : [ "float", "bang" ],
 					"patching_rect" : [ 1160.358119130134583, 640.224066734313965, 83.0, 22.0 ],
 					"text" : "buffer~ hamm"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"id" : "obj-95",
-					"maxclass" : "message",
-					"numinlets" : 2,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 829.439780592918282, 261.0, 48.0, 22.0 ],
-					"text" : "replace"
 				}
 
 			}
@@ -7199,20 +7175,6 @@
 				}
 
 			}
-, 			{
-				"box" : 				{
-					"id" : "obj-10",
-					"maxclass" : "button",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "bang" ],
-					"parameter_enable" : 0,
-					"patching_rect" : [ 876.104484998638441, 203.663808584213257, 24.0, 24.0 ],
-					"presentation" : 1,
-					"presentation_rect" : [ 645.466289222240448, 31.0, 78.0, 78.0 ]
-				}
-
-			}
  ],
 		"lines" : [ 			{
 				"patchline" : 				{
@@ -7225,13 +7187,6 @@
 				"patchline" : 				{
 					"destination" : [ "obj-87", 0 ],
 					"source" : [ "obj-1", 1 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-95", 0 ],
-					"source" : [ "obj-10", 0 ]
 				}
 
 			}
@@ -7298,7 +7253,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-51", 0 ],
-					"order" : 1,
+					"order" : 0,
 					"source" : [ "obj-105", 0 ]
 				}
 
@@ -7306,7 +7261,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-92", 0 ],
-					"order" : 0,
+					"order" : 1,
 					"source" : [ "obj-105", 0 ]
 				}
 
@@ -8869,7 +8824,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-42", 1 ],
-					"order" : 3,
+					"order" : 2,
 					"source" : [ "obj-90", 0 ]
 				}
 
@@ -8877,7 +8832,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-46", 1 ],
-					"order" : 2,
+					"order" : 3,
 					"source" : [ "obj-90", 0 ]
 				}
 
@@ -8895,13 +8850,6 @@
 					"destination" : [ "obj-53", 1 ],
 					"order" : 0,
 					"source" : [ "obj-90", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-92", 0 ],
-					"source" : [ "obj-91", 0 ]
 				}
 
 			}
@@ -8932,13 +8880,6 @@
 				"patchline" : 				{
 					"destination" : [ "obj-2", 4 ],
 					"source" : [ "obj-94", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-92", 0 ],
-					"source" : [ "obj-95", 0 ]
 				}
 
 			}
@@ -9007,7 +8948,7 @@
  ],
 		"dependency_cache" : [ 			{
 				"name" : "grainGenSingleChan~.gendsp",
-				"bootpath" : "~/Documents/MProj/CPGrains",
+				"bootpath" : "~/Documents/GitHub/CPGrains",
 				"patcherrelativepath" : ".",
 				"type" : "gDSP",
 				"implicit" : 1
